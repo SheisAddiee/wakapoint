@@ -1,0 +1,8 @@
+{
+  "name": "Geo-NER & Routing Normaliser",
+  "description": "Developer workstation for informal logistics, messy address decomposition, Geo-NER entity extraction, and spatial routing normalization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
