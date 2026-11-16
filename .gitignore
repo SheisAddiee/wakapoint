@@ -1,14 +1,62 @@
+# Dependencies and package-manager caches
 node_modules/
-build/
+.npm/
+.pnpm-store/
+.yarn/cache/
+
+# Build output and generated checks
 dist/
+build/
 coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
+.vite/
+*.tsbuildinfo
+playwright-report/
+test-results/
+blob-report/
+
+# Local development, preview captures and agent tooling
 .setup/
-.claude/
 .preview/
 .claude/
-.setup/
-docs/
+.codex/
+.agents/
+.vercel/
+supabase/.temp/
+supabase/.branches/
+
+# Environment files and credentials (commit templates only)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+
+# Logs, temporary files and editor/OS metadata
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Downloaded starter archives and their pointer file
+/geo-ner-&-routing-normaliser.zip
+/*.zip
+/*.7z
+/*.rar
+/c37f2da8-1210-45b7-bffe-571f9a0b301c.txt
+/bun.lock
+
+# Keep application source, SQL, documentation, tests, public assets,
+# the concept note and package-lock.json available for submission.

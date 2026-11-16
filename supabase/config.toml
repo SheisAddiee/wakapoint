@@ -1,0 +1,4 @@
+project_id = "wakapoint"
+
+[functions.wakapoint-gateway]
+verify_jwt = true
