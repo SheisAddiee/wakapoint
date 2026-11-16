@@ -8,3 +8,7 @@ coverage/
 !.env.example
 .setup/
 .claude/
+.preview/
+.claude/
+.setup/
+docs/
