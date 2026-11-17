@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, Bookmark, Braces, Check, ChevronRight, CircleHelp, Clock3, Code2, Copy, FileStack, Fingerprint, Globe2, LocateFixed, MapPin, Menu, Navigation2, Plus, ShieldCheck, Sparkles, X, Zap } from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowRight, ArrowUpRight, Bookmark, Braces, Check, ChevronRight, CircleHelp, Clock3, Code2, Copy, FileStack, Fingerprint, Globe2, LocateFixed, LogOut, MapPin, Menu, Navigation2, Plus, ShieldCheck, Sparkles, X, Zap } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { Drawer } from 'vaul';
 import { WorkspaceMap } from './components/WorkspaceMap';
@@ -9,17 +9,19 @@ import { dispatchPayload, downloadFile, loadSaved, normalizeSavedRecords, proces
 import { BatchView, DeveloperView, PostcodeView, PrivacyView, SavedView } from './components/WorkspaceViews';
 import { loadGateway, validateGateway, type GatewayConfig } from './lib/gateway';
 import { loadCloudRecords, saveCloudRecords } from './lib/supabase';
+import { initialExample, type WorkspacePreferences } from './lib/onboarding';
 
 const nav = [{ id: 'resolve' as View, label: 'Address resolver', icon: LocateFixed }, { id: 'batch' as View, label: 'Batch studio', icon: FileStack }, { id: 'saved' as View, label: 'Saved addresses', icon: Bookmark }];
 const tools = [{ id: 'postcode' as View, label: 'Postcode bridge', icon: Globe2 }, { id: 'developers' as View, label: 'Developer tools', icon: Code2 }, { id: 'privacy' as View, label: 'Privacy shield', icon: ShieldCheck }];
 const titles: Record<View, string> = { resolve: 'Address resolver', batch: 'Batch studio', saved: 'Saved addresses', postcode: 'Postcode bridge', developers: 'Developer tools', privacy: 'Privacy shield' };
 const readView = (): View => { const v = location.hash.slice(1); return Object.keys(titles).includes(v) ? v as View : 'resolve'; };
 
-export default function WorkspaceApp() {
-  const [view, setView] = useState<View>(readView), [input, setInput] = useState(EXAMPLES[0].text);
-  const [result, setResult] = useState<AddressResult | null>(() => resolveAddress(EXAMPLES[0].text));
-  const [point, setPoint] = useState<ConfirmedPoint | null>(null), [records, setRecords] = useState<SavedAddress[]>(loadSaved);
-  const [config] = useState<GatewayConfig>(loadGateway), [batch, setBatch] = useState<AddressResult[]>([]);
+export default function WorkspaceApp({ gatewayConfig = loadGateway(), preferences, demo = false, accountLabel = 'WakaPoint workspace', onSignOut, signingOut = false }: { gatewayConfig?: GatewayConfig; preferences?: WorkspacePreferences; demo?: boolean; accountLabel?: string; onSignOut?: () => void; signingOut?: boolean }) {
+  const example = EXAMPLES[initialExample(preferences?.city)];
+  const [view, setView] = useState<View>(readView), [input, setInput] = useState(example.text);
+  const [result, setResult] = useState<AddressResult | null>(() => resolveAddress(example.text));
+  const [point, setPoint] = useState<ConfirmedPoint | null>(null), [records, setRecords] = useState<SavedAddress[]>(() => gatewayConfig.url ? [] : loadSaved());
+  const [config] = useState<GatewayConfig>(gatewayConfig), [batch, setBatch] = useState<AddressResult[]>([]);
   const [cloudReady, setCloudReady] = useState(false), [saving, setSaving] = useState(false);
   const [cloudLoading, setCloudLoading] = useState(!!config.url && !!config.publicKey);
   const savePending = useRef(false);
