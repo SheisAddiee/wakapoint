@@ -63,7 +63,7 @@ export function resolveAddress(rawInput: string): AddressResult {
   const redacted = redactPersonalData(rawInput.trim());
   const input = redacted.text.replace(/[ \t]+/g, ' ');
   const matches = LOCATIONS.filter(l => l.aliases.some(a => new RegExp(`\\b${a}\\b`, 'i').test(input)));
-  const location = matches.sort((a, b) => b.aliases[0].length - a.aliases[0].length)[0] ?? null;
+  const location = matches.sort((a, b) => Number(['Abuja','Lagos'].includes(a.name)) - Number(['Abuja','Lagos'].includes(b.name)) || b.aliases[0].length - a.aliases[0].length)[0] ?? null;
   const conflicting = location && matches.some(l => l.state !== location.state);
   const clauses = input.split(/[,;\n]+/).map(c => c.trim()).filter(Boolean);
   const landmarks = unique((input.match(/(?:\b(?:[\p{L}\p{N}'-]+\s+){0,2})?(?:water tank|transformer|filling station|petrol station|primary school|school|pedestrian bridge|bridge|modern market|market|junction|mosque|church|hospital|shop|kiosk)\b/giu) ?? []).map(value => value.replace(/^(?:(?:opposite|behind|near|the|by|after|before|second|first|third|off|entering|through)\s+)+/i, '')));

@@ -20,8 +20,25 @@ export function downloadFile(filename: string, data: string, type = 'application
 export function loadSaved(): SavedAddress[] {
   try {
     const data: unknown = JSON.parse(localStorage.getItem('wakapoint.saved.v1') || '[]');
-    return Array.isArray(data) ? data.filter((item): item is SavedAddress => !!item && typeof item.id === 'string' && typeof item.result?.input === 'string' && typeof item.savedAt === 'string').slice(0, 100) : [];
+    return normalizeSavedRecords(data);
   } catch { return []; }
+}
+export function normalizeSavedRecords(data: unknown): SavedAddress[] {
+  if (!Array.isArray(data)) return [];
+  return data.slice(0,100).flatMap(item => {
+    if (!item || typeof item.id !== 'string' || typeof item.result?.input !== 'string' || typeof item.savedAt !== 'string' || !Number.isFinite(Date.parse(item.savedAt))) return [];
+    try {
+      const result = resolveAddress(item.result.input);
+      const priorCount = item.result.redactedCount;
+      if (Number.isInteger(priorCount) && priorCount >= 0 && priorCount <= 2000) {
+        result.redactedCount = Math.max(result.redactedCount, priorCount);
+        result.json.privacy = { ...(result.json.privacy as Record<string, unknown>), redacted_items: result.redactedCount };
+      }
+      const candidate = item.point;
+      const point: ConfirmedPoint | null = candidate?.source === 'dispatcher_confirmed' && typeof candidate.latitude === 'number' && Number.isFinite(candidate.latitude) && Math.abs(candidate.latitude) <= 90 && typeof candidate.longitude === 'number' && Number.isFinite(candidate.longitude) && Math.abs(candidate.longitude) <= 180 ? { latitude: candidate.latitude, longitude: candidate.longitude, source: 'dispatcher_confirmed' } : null;
+      return [{ id:item.id,savedAt:item.savedAt,result,point,postcode:typeof item.postcode === 'string' ? parsePostcode(item.postcode)?.canonical ?? null : null }];
+    } catch { return []; }
+  });
 }
 export function saveRecords(records: SavedAddress[]) { localStorage.setItem('wakapoint.saved.v1', JSON.stringify(records.slice(0, 100))); }
 export function processBatch(text: string): AddressResult[] {

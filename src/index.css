@@ -26,3 +26,21 @@
 @media (prefers-reduced-transparency:reduce) { .map-location-tag { backdrop-filter: none; background: #212121; } }
 @media (prefers-contrast:more) { :root { --border: #6f6f6f; } .panel,.sidebar { border-color: #6f6f6f; } .muted,.eyebrow,.field-help { color: #cacaca; } }
 ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: #151515; } ::-webkit-scrollbar-thumb { background: #4c4c4c; border-radius: 5px; }
+
+.review-notes { padding: 16px 22px; border-top: 1px solid var(--border); font-size: 11px; line-height: 1.8; color: #bdbdbd; }
+.review-notes strong { font-weight: 500; color: #dedede; }
+.review-notes ul { padding-left: 18px; margin-top: 5px; list-style: disc; }
+.code-block pre,.privacy-demo pre { overflow-wrap: anywhere; }
+/* Final legibility and map material pass. */
+.leaflet-tile-pane { filter: grayscale(1) invert(1) contrast(.9) brightness(.72); }
+.nav-item { font-size: 12px; } .workspace-label strong { font-size: 12px; } .workspace-label span:not(.workspace-mark) { font-size: 10px; }
+.breadcrumbs,.connection-status { font-size: 11px; } .metric > div { font-size: 12px; } .metric small { font-size: 10px; }
+.heading-with-icon { font-size: 13px; } .input-body > label { font-size: 13px; } .field-help { font-size: 11px; }
+.textarea-container textarea { font-size: 13px; line-height: 1.75; min-height: 124px; } .resolve-button { font-size: 12px; }
+.example-item strong { font-size: 12px; } .example-item small { font-size: 10px; } .example-heading { margin-top: 22px; }
+.result-header p { font-size: 11px; } .result-tabs button { font-size: 11px; } .entity-tag { font-size: 10px; } .entity-cell p { font-size: 10px; }
+.privacy-input-note,.result-footer { font-size: 9px; } .map-location-tag { font-size: 10px; } .map-footer .eyebrow { font-size: 8px; }
+.view-body > p,.form-field > label,.review-checkbox { font-size: 12px; } .form-field input:not([type=checkbox]),.form-field textarea { font-size: 13px; }
+[data-input-modality=keyboard] .dialog-popup,[data-input-modality=keyboard] [data-vaul-drawer],[data-input-modality=keyboard] [data-sonner-toast] { transition: none !important; animation: none !important; }
+[data-input-modality=keyboard] .button:active,[data-input-modality=keyboard] .icon-button:active { transform: none !important; }
+@media(max-width:700px) { .textarea-container textarea,.form-field input:not([type=checkbox]),.form-field textarea,.form-field select { font-size: 16px; } .textarea-container textarea { min-height: 170px; } .nav-item { min-height: 44px; font-size: 13px; } }

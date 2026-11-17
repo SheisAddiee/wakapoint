@@ -60,3 +60,6 @@ Desktop.ini
 
 # Keep application source, SQL, documentation, tests, public assets,
 # the concept note and package-lock.json available for submission.
+# Local conversation history
+/codex-session.md
+
