@@ -27,7 +27,7 @@ export function AuthScreen({ client, initialError = '', initialMode = 'signup' }
   const [error, setError] = useState(initialError), [privacyOpen, setPrivacyOpen] = useState(false), [resendAt, setResendAt] = useState(0), [seconds, setSeconds] = useState(0);
   const codeRef = useRef<HTMLInputElement>(null);
   const mounted = useRef(true);
-  useEffect(() => () => { mounted.current = false; }, []);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   useEffect(() => {
     if (!resendAt) return;
     const update = () => setSeconds(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)));

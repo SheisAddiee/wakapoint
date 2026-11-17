@@ -14,5 +14,8 @@ export interface WorkspacePreferences {
 export function readPreferences(value: unknown): WorkspacePreferences | null {
   if (!value || typeof value !== 'object') return null;
   const item = value as Record<string, unknown>;
-  return item.version === 1 && ROLES.some(r => r.id === item.role) && HOME_CITIES.some(c => c === item.city) && ['resolve', 'batch'].includes(String(item.firstTask)) ? item as unknown as WorkspacePreferences : null;
+  const role = ROLES.find(r => r.id === item.role)?.id;
+  const city = HOME_CITIES.find(c => c === item.city);
+  if (item.version !== 1 || !role || !city || (item.firstTask !== 'resolve' && item.firstTask !== 'batch')) return null;
+  return { version: 1, role, city, firstTask: item.firstTask, ...(item.tutorial === 'complete' || item.tutorial === 'skipped' ? { tutorial: item.tutorial } : {}) };
 }

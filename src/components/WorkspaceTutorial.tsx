@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Bookmark, Check, Fingerprint, MapPin, PencilLine
 import { Dialog } from '@base-ui/react/dialog';
 
 const steps = [
-  { title: 'Start with the customer's own words.', body: 'Enter the real delivery address, including a city, nearby landmark, gate or unit detail. Contact patterns are filtered before output is saved.', icon: PencilLine, tip: 'You can paste a message directly into Address input.' },
+  { title: "Start with the customer's own words.", body: 'Enter the real delivery address, including a city, nearby landmark, gate or unit detail. Contact patterns are filtered before output is saved.', icon: PencilLine, tip: 'You can paste a message directly into Address input.' },
   { title: 'Resolve, then check the details.', body: 'Resolve address extracts landmarks, building details and delivery cues. Missing or conflicting information is flagged so you can ask the customer before dispatch.', icon: Fingerprint, tip: 'Coverage describes what was extracted. It is not a delivery accuracy score.' },
   { title: 'Confirm the final delivery point.', body: 'The map starts with an approximate locality. Place a delivery pin on the street map and confirm it with the customer. A locality centre is never an exact building location.', icon: MapPin, tip: 'Keyboard users can pan with arrows and press Enter while placing a pin.' },
   { title: 'Check a postcode with NIPOST.', body: 'Use Postcode bridge to look up an official digital postcode. NIPOST confirms that the code exists; you must still confirm that it matches this destination before attaching it.', icon: ShieldCheck, tip: 'Official lookup uses your secure service connection and may use NIPOST credits.' },

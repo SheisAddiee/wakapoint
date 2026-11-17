@@ -16,6 +16,8 @@ function AppContent() {
   const { theme, setTheme } = useTheme();
   const themeAccount = useRef('');
   const syncingTheme = useRef(false);
+  const accountEpoch = useRef(0);
+  const activeAccount = useRef<string | null>(null);
   const [config] = useState(loadGateway);
   const [client] = useState(() => { try { return getSupabase(config); } catch { return null; } });
   const [session, setSession] = useState<Session | null>(null), [initializing, setInitializing] = useState(!!client);
@@ -25,23 +27,35 @@ function AppContent() {
   useEffect(() => {
     if (!client) return;
     let cancelled = false;
+    const acceptSession = (next: Session | null) => {
+      if (cancelled) return;
+      const accepted = next?.user.is_anonymous ? null : next;
+      const id = accepted?.user.id || null;
+      if (activeAccount.current !== id) {
+        accountEpoch.current += 1;
+        activeAccount.current = id;
+        setTutorialDismissed(false); setTutorialRequested(false);
+      }
+      setSession(accepted);
+    };
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, next) => {
       if (_event === 'SIGNED_OUT') toast.dismiss();
-      if (!cancelled) setSession(next?.user.is_anonymous ? null : next);
+      acceptSession(next);
     });
     client.auth.getSession().then(({ data, error: authError }) => {
       if (cancelled) return;
-      setSession(data.session?.user.is_anonymous ? null : data.session);
+      acceptSession(data.session);
       const url = new URL(location.href);
       if (authError || url.searchParams.has('error')) setError('Sign-in could not be completed. Please try email or Google again.');
       ['code','error','error_code','error_description'].forEach(key => url.searchParams.delete(key));
       history.replaceState(null, '', url.pathname + url.search + url.hash);
     }).catch(() => { if (!cancelled) setError('Your session could not be restored. Please sign in again.'); }).finally(() => { if (!cancelled) setInitializing(false); });
-    return () => { cancelled = true; subscription.unsubscribe(); };
+    return () => { cancelled = true; accountEpoch.current += 1; subscription.unsubscribe(); };
   }, [client]);
   useEffect(() => { const sync = () => setPublicPage(location.hash.slice(1)); window.addEventListener('hashchange', sync); return () => window.removeEventListener('hashchange', sync); }, []);
   useEffect(() => {
-    if (!session) { themeAccount.current = ''; return; }
+    if (!session) { themeAccount.current = ''; syncingTheme.current = false; return; }
+    syncingTheme.current = false;
     const saved = session.user.user_metadata?.wakapoint_theme;
     themeAccount.current = `${session.user.id}:${saved === 'light' || saved === 'dark' ? saved : theme}`;
     if ((saved === 'light' || saved === 'dark') && saved !== theme) { syncingTheme.current = true; setTheme(saved); }
@@ -55,7 +69,9 @@ function AppContent() {
     const next = `${session.user.id}:${theme}`;
     if (themeAccount.current === next) return;
     themeAccount.current = next;
-    client.auth.updateUser({ data: { wakapoint_theme: theme } }).then(({ error: syncError }) => { if (syncError) toast.info('Theme saved on this device. Account sync is unavailable.'); }).catch(() => toast.info('Theme saved on this device. Account sync is unavailable.'));
+    let cancelled = false;
+    client.auth.updateUser({ data: { wakapoint_theme: theme } }).then(({ error: syncError }) => { if (syncError && !cancelled) toast.info('Theme saved on this device. Account sync is unavailable.'); }).catch(() => { if (!cancelled) toast.info('Theme saved on this device. Account sync is unavailable.'); });
+    return () => { cancelled = true; };
   }, [theme, session?.user.id, client]);
 
   const preferences = readPreferences(session?.user.user_metadata?.wakapoint);
@@ -70,9 +86,11 @@ function AppContent() {
   };
   const complete = async (value: WorkspacePreferences) => {
     if (client && session) {
+      const epoch = accountEpoch.current;
       const { data, error: authError } = await client.auth.updateUser({ data: { wakapoint: value } });
+      if (epoch !== accountEpoch.current) return;
       if (authError || !data.user) throw authError || new Error('Setup did not save.');
-      location.hash = value.firstTask; setSession({ ...session, user: data.user }); toast.success('Your workspace is ready.');
+      location.hash = value.firstTask; toast.success('Your workspace is ready.');
     }
   };
   const finishTutorial = async (outcome: 'complete' | 'skipped') => {
@@ -80,9 +98,11 @@ function AppContent() {
     if (outcome === 'complete') toast.success('You are ready to resolve your first address.');
     else toast.info('Tutorial skipped. You can reopen it from Help anytime.');
     if (client && session && preferences) {
-      const { data, error: saveError } = await client.auth.updateUser({ data: { wakapoint: { ...preferences, tutorial: outcome } } });
-      if (saveError) toast.info('Your tutorial preference could not sync. You can keep working.');
-      else if (data.user) setSession({ ...session, user: data.user });
+      const epoch = accountEpoch.current;
+      try {
+        const { error: saveError } = await client.auth.updateUser({ data: { wakapoint: { ...preferences, tutorial: outcome } } });
+        if (saveError && epoch === accountEpoch.current) toast.info('Your tutorial preference could not sync. You can keep working.');
+      } catch { if (epoch === accountEpoch.current) toast.info('Your tutorial preference could not sync. You can keep working.'); }
     }
   };
 
