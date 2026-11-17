@@ -3,16 +3,22 @@ node_modules/
 .npm/
 .pnpm-store/
 .yarn/cache/
+.cache/
 
 # Build output and generated checks
 dist/
 build/
 coverage/
+.nyc_output/
 .vite/
 *.tsbuildinfo
+.eslintcache
+.stylelintcache
 playwright-report/
 test-results/
 blob-report/
+# Playwright storage state can contain authenticated session tokens.
+/playwright/.auth/
 
 # Local development, preview captures and agent tooling
 .setup/
@@ -21,6 +27,7 @@ blob-report/
 .codex/
 .agents/
 .vercel/
+.aws/
 supabase/.temp/
 supabase/.branches/
 
@@ -38,6 +45,8 @@ service-account*.json
 
 # Logs, temporary files and editor/OS metadata
 *.log
+*.pid
+*.pid.lock
 *.tmp
 *.temp
 *.bak
@@ -60,6 +69,6 @@ Desktop.ini
 
 # Keep application source, SQL, documentation, tests, public assets,
 # the concept note and package-lock.json available for submission.
+
 # Local conversation history
 /codex-session.md
-

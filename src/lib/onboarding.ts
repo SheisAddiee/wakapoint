@@ -9,12 +9,10 @@ export interface WorkspacePreferences {
   role: typeof ROLES[number]['id'];
   city: typeof HOME_CITIES[number];
   firstTask: 'resolve' | 'batch';
+  tutorial?: 'complete' | 'skipped';
 }
 export function readPreferences(value: unknown): WorkspacePreferences | null {
   if (!value || typeof value !== 'object') return null;
   const item = value as Record<string, unknown>;
   return item.version === 1 && ROLES.some(r => r.id === item.role) && HOME_CITIES.some(c => c === item.city) && ['resolve', 'batch'].includes(String(item.firstTask)) ? item as unknown as WorkspacePreferences : null;
-}
-export function initialExample(city?: string) {
-  return city === 'Lagos' ? 2 : city === 'Benin City' ? 1 : 0;
 }

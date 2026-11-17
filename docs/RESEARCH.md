@@ -6,6 +6,14 @@ Reviewed on 16 November 2026, before implementation.
 
 The root concept note describes a Nigerian narrative-address resolver, spatial matching and a privacy-preserving NIPOST bridge. The user has named it **WakaPoint**, selected dispatch teams as the primary audience, requested an aesthetic black-and-grey geospatial workspace, and authorized a frontend plus Supabase gateway. Submission is next week.
 
+## Account flow update: 17 November 2026
+
+The user requested signup/onboarding inspired by Claude's mobile composition, with WakaPoint's dark palette, email and Google. [Claude's login guidance](https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account) confirms the email/Google entry pattern. The visual translation uses a centred wordmark, restrained serif heading, stacked full-width controls and a short privacy note.
+
+[Supabase email OTP](https://supabase.com/docs/guides/auth/auth-email-passwordless) uses `signInWithOtp` and `verifyOtp`; the Magic Link template must include `{{ .Token }}` to send the code. [Google integration](https://supabase.com/docs/guides/auth/social-login/auth-google) requires an OAuth Web client in the provider dashboard and allowed app callback URLs. The client uses the pinned official SDK and PKCE, with shared Auth/gateway/storage sessions. Current [Edge Function authentication](https://supabase.com/docs/guides/functions/auth) documents keeping `verify_jwt = true` for authenticated user calls; the gateway also verifies tokens through Auth.
+
+The Supabase changelog was checked for relevant breaking changes. No hosted project was provisioned; operator setup and hosted verification remain separate from local code/browser tests.
+
 ## Official programme findings
 
 - [Selection criteria](https://pitch.postcode.gov.ng/#selection): working solution, meaningful official API use, practical value and execution each carry 25%. Responsible data handling is a pass/fail requirement. Presentations are five minutes with five minutes of questions. This is an adoption showcase; the page says there is no prize money.

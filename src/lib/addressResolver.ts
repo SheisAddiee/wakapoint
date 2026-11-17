@@ -82,7 +82,7 @@ export function resolveAddress(rawInput: string): AddressResult {
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
   const json = {
-    id, mode: 'local_rule_based_demo', verified: false, normalized_address: normalized,
+    id, mode: 'local_rule_based', verified: false, normalized_address: normalized,
     entities: { country: 'Nigeria', state: location?.state ?? null, lga: location?.lga ?? null, locality: location?.name ?? null, landmarks, positional_cues: directions, structure_identifiers: identifiers, units },
     approximate_locality: location ? { latitude: location.latitude, longitude: location.longitude, precision: 'locality', source: 'bundled_locality_centres' } : null,
     nipost_digital_postcode: null, extraction_coverage: coverage / 100, review_status: status,

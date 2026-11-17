@@ -1,5 +1,5 @@
 -- WakaPoint website storage. Run in your project's SQL editor.
--- Application sessions are anonymous Supabase Auth users, not an unauthenticated anon role.
+-- Application sessions are email/Google Supabase Auth users, not the unauthenticated anon role.
 begin;
 
 create table if not exists public.saved_addresses (
@@ -25,7 +25,7 @@ create policy saved_addresses_insert on public.saved_addresses for insert to aut
 create policy saved_addresses_update on public.saved_addresses for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy saved_addresses_delete on public.saved_addresses for delete to authenticated using ((select auth.uid()) = user_id);
 
--- Atomically persist this device session's library. RLS applies to every operation.
+-- Atomically persist this authenticated account's library. RLS applies to every operation.
 create or replace function public.save_wakapoint_library(p_records jsonb)
 returns void language plpgsql security invoker set search_path = '' as $$
 declare owner_id uuid := auth.uid();

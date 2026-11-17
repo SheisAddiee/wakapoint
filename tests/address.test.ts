@@ -12,7 +12,7 @@ test('all concept-note examples yield distinct address context without invented 
     assert.equal(result.json.verified,false);
     assert.equal(result.json.nipost_digital_postcode,null);
     assert.ok(result.elapsedMs >= 0);
-    assert.equal(result.json.mode,'local_rule_based_demo');
+    assert.equal(result.json.mode,'local_rule_based');
   });
 });
 test('changed text in a known locality does not replay preset directions', () => {

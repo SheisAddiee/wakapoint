@@ -8,6 +8,10 @@ const code = 'FC-01-A01-KP-27';
 const cloudOrigin = 'http://127.0.0.1:4174';
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem('wakapoint.demo.v1', 'true');
+    sessionStorage.setItem('wakapoint.demo.preferences.v1', JSON.stringify({ version: 1, role: 'dispatch', city: 'Abuja', firstTask: 'resolve' }));
+  });
   // Deterministic map outage; the online map is exercised separately.
   await page.route('https://tile.openstreetmap.org/**', route => route.abort());
 });
@@ -18,7 +22,7 @@ async function resolve(page: Page, value: string) {
 }
 
 test('dispatch redacts, requires review, exports, persists, deletes and restores', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await resolve(page, syntheticAddress);
   await page.getByRole('tab', { name: 'JSON response' }).click();
   const output = await page.getByRole('tabpanel').innerText();
@@ -37,7 +41,7 @@ test('dispatch redacts, requires review, exports, persists, deletes and restores
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await page.getByRole('button', { name: /Saved addresses/ }).first().click();
   await expect(page.getByRole('row')).toHaveCount(2);
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /^Open/ }).click();
   await page.getByRole('tab', { name: 'JSON response' }).click();
   await expect(page.getByRole('tabpanel')).toContainText('"redacted_items": 3');
@@ -49,7 +53,7 @@ test('dispatch redacts, requires review, exports, persists, deletes and restores
 });
 
 test('changed input blocks handoff, and unresolved or conflicting geography explains the review', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('Where are we delivering?').fill('Green gate, Ikeja, Abuja');
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Export', exact: true })).toBeDisabled();
@@ -61,7 +65,7 @@ test('changed input blocks handoff, and unresolved or conflicting geography expl
 });
 
 test('batch processes, filters, paginates and exports reviewed data', async ({ page }) => {
-  await page.goto('/#batch');
+  await page.goto('/#batch', { waitUntil: 'domcontentloaded' });
   const rows = [...Array.from({ length: 21 }, (_, i) => `Shop ${i + 1}, behind market, Ikeja`), 'Unknown village'];
   await page.getByLabel('One address per line').fill(rows.join('\n'));
   await page.getByRole('button', { name: 'Process addresses' }).click();
@@ -83,7 +87,7 @@ test('batch processes, filters, paginates and exports reviewed data', async ({ p
 });
 
 test('postcode format checks stay local while the service is inactive', async ({ page }) => {
-  await page.goto('/#postcode');
+  await page.goto('/#postcode', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('NIPOST digital postcode').fill('fc 01 a01 kp 27');
   await expect(page.locator('.segment strong')).toHaveText(['FC', '01', 'A01', 'KP', '27']);
   await expect(page.getByRole('button', { name: 'Verify with NIPOST' })).toBeDisabled();
@@ -94,7 +98,7 @@ test('postcode format checks stay local while the service is inactive', async ({
 
 test('storage failure reports an error and keeps the library unchanged', async ({ page }) => {
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new DOMException('Unavailable', 'QuotaExceededError'); }; });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('The address library could not save this change.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: /Saved addresses/ }).first().click();
@@ -105,7 +109,7 @@ test('mobile navigation, long input, checkout and privacy work without horizonta
   await page.setViewportSize({ width: 390, height: 844 });
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await resolve(page, `Shop 14, ${'LongLandmark'.repeat(100)}, Ikeja`);
   for (const view of ['Address resolver', 'Batch studio', 'Saved addresses', 'Postcode bridge', 'Developer tools', 'Privacy shield']) {
     await page.getByRole('button', { name: 'Open navigation' }).click();
@@ -117,7 +121,7 @@ test('mobile navigation, long input, checkout and privacy work without horizonta
   const filtered = await page.locator('.privacy-demo pre').innerText();
   expect(filtered).not.toContain('08012345678');
   expect(filtered).not.toContain('Test Person');
-  await page.goto('/#developers');
+  await page.goto('/#developers', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('Delivery address').fill(EXAMPLES[2].text);
   await page.getByRole('button', { name: 'Review delivery details' }).click();
   await expect(page.locator('.checkout-preview .status-box')).toContainText('Ikeja');
@@ -126,7 +130,7 @@ test('mobile navigation, long input, checkout and privacy work without horizonta
 
 test('keyboard tabs, reduced motion, dialog focus and offline map are usable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByText('Offline schematic', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Place delivery pin' })).toBeDisabled();
   await page.getByRole('tab', { name: 'Extracted entities' }).focus();
@@ -145,7 +149,7 @@ test('keyboard tabs, reduced motion, dialog focus and offline map are usable', a
 test('online map supports keyboard placement, confirmation and point reset', async ({ page }) => {
   await page.unroute('https://tile.openstreetmap.org/**');
   await page.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#ddd"/></svg>' }));
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: 'Place delivery pin' })).toBeEnabled();
   await page.getByRole('button', { name: 'Place delivery pin' }).click();
   await page.keyboard.press('ArrowRight');
@@ -160,6 +164,10 @@ test('online map supports keyboard placement, confirmation and point reset', asy
 });
 
 async function configureCloud(page: Page, failLookup = false) {
+  await page.addInitScript(() => {
+    sessionStorage.removeItem('wakapoint.demo.v1');
+    localStorage.setItem('sb-wakapoint-test-auth-token', JSON.stringify({ access_token: 'synthetic-user-access-token-123456789', refresh_token: 'synthetic-refresh', expires_at: Date.now() / 1000 + 3600, user: { id: 'synthetic-user', email: 'test@example.com', user_metadata: { wakapoint: { version: 1, role: 'dispatch', city: 'Abuja', firstTask: 'resolve' } } } }));
+  });
   let saved: unknown[] = [];
   const requests: string[] = [];
   const env: Record<string, string> = { WAKAPOINT_ALLOWED_ORIGINS: cloudOrigin, SUPABASE_URL: 'https://wakapoint-test.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'synthetic_server_key', NIPOST_API_KEY: 'nipost_test_synthetic_key' };
@@ -195,10 +203,10 @@ async function configureCloud(page: Page, failLookup = false) {
 
 test('cloud session, library and authenticated postcode link flow through the gateway', async ({ page }) => {
   const requests = await configureCloud(page);
-  await page.goto(cloudOrigin);
+  await page.goto(cloudOrigin, { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.connection-status')).toContainText('Cloud workspace');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await page.reload();
+  await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.locator('.connection-status')).toContainText('Cloud workspace');
   await page.getByRole('button', { name: /Saved addresses/ }).first().click();
   await expect(page.getByRole('row')).toHaveCount(2);
@@ -218,7 +226,7 @@ test('cloud session, library and authenticated postcode link flow through the ga
 
 test('upstream failure stays actionable and cannot be attached as a verified code', async ({ page }) => {
   await configureCloud(page, true);
-  await page.goto(cloudOrigin + '/#postcode');
+  await page.goto(cloudOrigin + '/#postcode', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('NIPOST digital postcode').fill(code);
   await page.getByRole('button', { name: 'Verify with NIPOST' }).click();
   await expect(page.getByRole('alert')).toContainText('credits are insufficient');
@@ -236,7 +244,7 @@ test('editing a postcode cancels an in-flight lookup and discards its stale resu
     await pending;
     await route.fulfill({ json: { data: { postcode: code, valid: true } }, headers: { 'Access-Control-Allow-Origin': cloudOrigin } }).catch(() => {});
   });
-  await page.goto(cloudOrigin + '/#postcode');
+  await page.goto(cloudOrigin + '/#postcode', { waitUntil: 'domcontentloaded' });
   await page.getByLabel('NIPOST digital postcode').fill(code);
   await page.getByRole('button', { name: 'Verify with NIPOST' }).click();
   await requested;

@@ -17,9 +17,9 @@ export function downloadFile(filename: string, data: string, type = 'application
   link.href = url; link.download = filename; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export function loadSaved(): SavedAddress[] {
+export function loadSaved(storageKey = 'wakapoint.saved.v1'): SavedAddress[] {
   try {
-    const data: unknown = JSON.parse(localStorage.getItem('wakapoint.saved.v1') || '[]');
+    const data: unknown = JSON.parse(localStorage.getItem(storageKey) || '[]');
     return normalizeSavedRecords(data);
   } catch { return []; }
 }
@@ -40,7 +40,7 @@ export function normalizeSavedRecords(data: unknown): SavedAddress[] {
     } catch { return []; }
   });
 }
-export function saveRecords(records: SavedAddress[]) { localStorage.setItem('wakapoint.saved.v1', JSON.stringify(records.slice(0, 100))); }
+export function saveRecords(records: SavedAddress[], storageKey = 'wakapoint.saved.v1') { localStorage.setItem(storageKey, JSON.stringify(records.slice(0, 100))); }
 export function processBatch(text: string): AddressResult[] {
   const rows = text.split(/\r?\n/).map(row => row.trim()).filter(Boolean);
   if (!rows.length) throw new Error('Add at least one address, one per line.');
