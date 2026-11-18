@@ -2,6 +2,9 @@
 import { Accordion } from '@base-ui/react/accordion';
 import { ArrowDown, ArrowRight, ArrowUpRight, Bookmark, Braces, Check, ChevronDown, FileStack, Fingerprint, Layers3, LockKeyhole, MapPin, Navigation2, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { BlurText } from './reactbits/BlurText';
+import { SpotlightCard } from './reactbits/SpotlightCard';
+import { HeroOrbit } from './HeroOrbit';
 
 const features = [
   { icon: Fingerprint, title: 'Address intelligence', text: 'Give landmarks, building identifiers and local delivery cues their own place. Keep the details that make an address useful.', note: 'From a description to structured context' },
@@ -60,12 +63,13 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
     <header className="landing-nav" data-over-hero={overHero}>
       <a className="auth-brand" href="#home" aria-label="WakaPoint home"><Navigation2 size={25} strokeWidth={1.5}/><span>WakaPoint<span>.</span></span></a>
       <nav aria-label="Page sections"><button onClick={e => scrollTo('how-it-works', e.detail > 0)}>How it works</button><button onClick={e => scrollTo('landing-features', e.detail > 0)}>Features</button><button onClick={e => scrollTo('landing-faq', e.detail > 0)}>FAQs</button></nav>
-      <div className="landing-nav-actions"><ThemeToggle/>{signedIn ? <button className="button primary" onClick={onWorkspace}>Open workspace <ArrowRight size={15}/></button> : <button className="landing-signin" onClick={onSignIn}>Sign in <ArrowUpRight size={14}/></button>}</div>
+      <div className="landing-nav-actions"><ThemeToggle flight/>{signedIn ? <button className="button primary" onClick={onWorkspace}>Open workspace <ArrowRight size={15}/></button> : <button className="landing-signin" onClick={onSignIn}>Sign in <ArrowUpRight size={14}/></button>}</div>
     </header>
     <main id="landing-main">
       <section className="landing-hero">
+        <HeroOrbit paused={!overHero}/>
         <div className="landing-kicker"><span/>BUILT FOR THE NIGERIAN LAST MILE</div>
-        <h1>Local directions.<br/><span>A clearer way forward.</span></h1>
+        <h1 aria-label="Local directions. A clearer way forward.">Local directions.<br/><BlurText text="A clearer way forward."/></h1>
         <p>Behind the school. Beside the market. Through the green gate.<br className="desktop-break"/> Turn the way people describe places into context your delivery team can use.</p>
         <div className="landing-hero-actions"><button className="button primary" onClick={start}>{signedIn ? 'Open your workspace' : 'Get started with WakaPoint'}<ArrowRight size={17}/></button><button className="landing-how-link" onClick={e => scrollTo('how-it-works', e.detail > 0)}>See how it works <ArrowDown size={15}/></button></div>
         <div className="landing-account-note"><ShieldCheck size={13}/>Your account. Your address library. Your next delivery.</div>
@@ -94,7 +98,7 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
       </section>
       <section className="landing-features" id="landing-features" data-reveal>
         <div className="landing-section-heading"><div><span className="landing-kicker">ONE WORKSPACE, A CLEARER WORKFLOW</span><h2>Built around the work.</h2></div><p>From the first address of the morning to the final dispatch list. The tools belong together.</p></div>
-        <div className="landing-feature-grid">{features.map(({ icon: Icon, title, text, note }, index) => <article key={title}><div className="feature-top"><Icon size={24} strokeWidth={1.25}/><span className="landing-section-index">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><small>{note}</small></article>)}</div>
+        <div className="landing-feature-grid">{features.map(({ icon: Icon, title, text, note }, index) => <SpotlightCard key={title}><article><div className="feature-top"><Icon size={24} strokeWidth={1.25}/><span className="landing-section-index">0{index + 1}</span></div><h3>{title}</h3><p>{text}</p><small>{note}</small></article></SpotlightCard>)}</div>
       </section>
       <section className="landing-roles landing-section" data-reveal>
         <div className="landing-section-heading"><div><span className="landing-kicker">DIFFERENT ROLES. THE SAME DESTINATION.</span><h2>A better starting point<br/>for your kind of work.</h2></div><p>Choose your workspace role during setup. Start with the task that matters to you.</p></div>

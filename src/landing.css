@@ -155,7 +155,7 @@
 .landing [data-visible="false"] { opacity: 0; transform: translateY(18px); }
 .landing [data-reveal]:focus-within { opacity: 1; transform: none; }
 .landing [data-instant="true"] { transition: none; }
-.landing-hero h1 { animation: landing-rise 600ms var(--ease-out) both; }
+.landing-hero h1 { animation: landing-fade 400ms var(--ease-out) both; }
 .landing-hero > p { animation: landing-support 500ms var(--ease-out) 80ms both; }
 .landing-hero-actions { animation: landing-support 500ms var(--ease-out) 130ms both; }
 .landing-hero > .landing-kicker,.landing-account-note { animation: landing-fade 400ms var(--ease-out) both; }
@@ -206,3 +206,34 @@
   .landing .button > svg,.landing-how-link > svg,.landing-signin > svg,.feature-top > svg,.faq-trigger > svg { transition: none; transform: none !important; }
   .faq-panel { transition: opacity 150ms ease; }
 }
+
+/* React Bits details, adapted to the existing editorial layout. */
+.rb-blur-text { display: inline; }
+.rb-blur-text > span { display: inline-block; }
+.rb-spotlight { position: relative; isolation: isolate; overflow: hidden; }
+.rb-spotlight-light { position: absolute; left: -160px; top: -160px; width: 320px; height: 320px; border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0; background: radial-gradient(circle,rgb(255 255 255 / 7%),transparent 70%); transition: opacity 180ms ease; }
+.light .rb-spotlight-light { background: radial-gradient(circle,rgb(40 40 36 / 6%),transparent 70%); }
+.landing-feature-grid .rb-spotlight { border-bottom: 1px solid var(--site-border); }
+.landing-feature-grid .rb-spotlight article { border: 0; padding: 28px 14px; }
+.hero-orbit { position: absolute; inset: 0; overflow: hidden; pointer-events: none; color: var(--site-text); z-index: 0; }
+.landing-hero > :not(.hero-orbit) { position: relative; z-index: 1; }
+.hero-flight-path { position: absolute; left: 2.5%; top: 170px; width: 230px; height: 180px; }
+.hero-flight-path > svg { width: 100%; height: 100%; opacity: .25; }
+.hero-airplane { position: absolute; top: 145px; left: 3px; opacity: 0; animation: hero-flight 18s linear 1.2s infinite; }
+.hero-satellite { position: absolute; top: 65px; right: 4.5%; width: 135px; height: 135px; opacity: .55; }
+.hero-orbit-ring { position: absolute; inset: 0; animation: orbit-turn 48s linear infinite; }
+.hero-orbit-ring > span { position: absolute; inset: 0; text-align: center; font: 8px/1.2 ui-monospace,monospace; }
+.hero-satellite-core { position: absolute; inset: 23px; display: grid; place-items: center; border: 1px solid rgb(170 169 162 / 28%); border-radius: 50%; }
+.hero-satellite-core i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: currentColor; right: 9px; top: 9px; }
+.hero-orbit[data-paused="true"] *,.hero-orbit[data-hidden="true"] * { animation-play-state: paused; }
+@keyframes orbit-turn { to { transform: rotate(360deg); } }
+@keyframes hero-flight {
+  0% { opacity: 0; transform: translate(0,0) rotate(4deg); }
+  6% { opacity: .7; }
+  24% { transform: translate(45px,-84px) rotate(35deg); }
+  38% { opacity: .7; transform: translate(158px,-119px) rotate(64deg); }
+  44%,100% { opacity: 0; transform: translate(200px,-116px) rotate(64deg); }
+}
+@media(max-width:1100px) { .hero-satellite { width: 100px; height: 100px; top: 15px; right: 22px; opacity: .45; } .hero-satellite-core { inset: 17px; } .hero-flight-path { top: 10px; left: 15px; width: 120px; height: 100px; opacity: .5; } .hero-airplane { top: 52px; left: 0; } }
+@media(max-width:700px) { .hero-satellite { width: 68px; height: 68px; top: 12px; right: 16px; opacity: .4; } .hero-orbit-ring > span { font-size: 5px; } .hero-satellite-core { inset: 12px; } .hero-satellite-core svg { width: 22px; height: 22px; } .hero-flight-path { width: 90px; height: 80px; top: 8px; left: 12px; } .hero-airplane svg { width: 20px; height: 20px; } .hero-airplane { animation: none; opacity: .6; top: 35px; left: 12px; transform: rotate(14deg); } .landing-feature-grid .rb-spotlight article { padding-left: 0; padding-right: 0; } }
+@media(prefers-reduced-motion:reduce) { .hero-orbit-ring,.hero-airplane { animation: none; } .hero-airplane { opacity: .5; } .rb-spotlight-light { display: none; } }
