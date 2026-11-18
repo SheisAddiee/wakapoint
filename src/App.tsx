@@ -106,7 +106,7 @@ function AppContent() {
     }
   };
 
-  if (initializing) return <AuthFrame><div className="auth-loading" role="status"><span className="auth-eyebrow">WAKAPOINT</span><p>Opening your workspace…</p></div></AuthFrame>;
+  if (initializing) return <AuthFrame><div className="auth-loading" role="status"><div className="session-loader-mark" aria-hidden="true"><span/></div><span className="auth-eyebrow">WAKAPOINT</span><p>Opening your workspace…</p><div className="session-loader-lines" aria-hidden="true"><span/><span/><span/></div></div></AuthFrame>;
   if (publicPage === 'home' || (!session && !publicPage && !error)) return <LandingPage signedIn={!!session} onStart={() => { location.hash = 'signup'; }} onSignIn={() => { location.hash = 'signin'; }} onWorkspace={() => { location.hash = 'resolve'; }}/>;
   if (!session) return <AuthScreen key={publicPage === 'signin' ? 'signin' : 'signup'} initialMode={publicPage === 'signin' ? 'signin' : 'signup'} client={client} initialError={error}/>;
   if (!preferences) return <Onboarding onComplete={complete} onBack={() => { void leave(); }}/>;

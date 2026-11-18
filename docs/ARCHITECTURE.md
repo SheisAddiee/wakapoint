@@ -1,6 +1,6 @@
 # WakaPoint architecture
 
-React 19 and TypeScript run in a Vite static frontend. `App.tsx` owns the account/demo boundary; `WorkspaceApp.tsx` owns hash-routed dispatch tools. Domain extraction, persistence normalization and export utilities are separate from components.
+React 19 and TypeScript run in a Vite static frontend. `App.tsx` owns public landing routes and the authenticated account boundary; `WorkspaceApp.tsx` owns hash-routed dispatch tools. Domain extraction, persistence normalization and export utilities are separate from components.
 
 ## Data flow
 
@@ -12,7 +12,7 @@ Email/Google → Supabase Auth SDK session → validated onboarding metadata →
 
 `public.saved_addresses` is keyed by record UUID and authenticated owner UUID. Select/insert/update/delete RLS policies require `auth.uid() = user_id`; the library RPC is `SECURITY INVOKER`. Full-library saves are atomic but concurrent stale tabs can overwrite newer content.
 
-Demo records use `wakapoint.saved.v1`. Account fallback libraries use `wakapoint.saved.<user-id>`. Cloud data is not copied into demo storage. Onboarding metadata is explicitly user-editable and never used for authorization.
+Address input/results remain in memory until saved to the cloud or exported. There is no demo bypass or local library fallback. Theme preferences use the device key `wakapoint.theme.v1` and account metadata `wakapoint_theme`. Onboarding and tutorial metadata are allowlisted through `readPreferences`; user-editable metadata is never used for authorization. Async preference writes follow the SDK auth observer instead of assigning captured sessions. Test Vite servers use separate dependency caches to preserve the live preview.
 
 The gateway verifies user tokens via Supabase Auth, validates postcode actions and origin, applies per-user/hashed-IP database rate counters, calls NIPOST with a server secret, allowlists output fields, and caches filtered valid lookups for one hour. Private cache/rate tables have no direct browser grants. Local tests exercise the handler with injected dependencies; hosted SQL and service behaviour need separate verification.
 

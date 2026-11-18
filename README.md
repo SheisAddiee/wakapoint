@@ -11,19 +11,20 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The account screen supports email verification codes and Google sign-in when Supabase is configured. **Explore the demo** runs onboarding and the local workspace without an account or credentials.
+Open http://localhost:3000. The public landing page leads to signup or sign-in. Email verification codes and Google sign-in require Supabase configuration; all workspace routes require an authenticated account.
 
 ## What works
 
-- Mobile signup, sign-in, verification-code entry, session restoration, sign-out and three-step workspace onboarding.
+- Public landing page, mobile signup, sign-in, verification-code entry, session restoration, sign-out, three-step onboarding and a skippable guided tutorial.
+- Persistent light/dark themes on the landing page, account screens and workspace.
 - On-device rule extraction of localities, landmarks, building identifiers, units and ordered delivery cues.
-- Interactive map with approximate locality centres, reviewed delivery pins and a labelled offline schematic.
+- Interactive map with approximate locality centres, reviewed delivery pins and a connection message when street tiles are unavailable.
 - Batch processing of up to 100 addresses, filters, pagination, reviewed CSV/JSON exports and spreadsheet formula protection.
-- Saved-address search, deletion and undo; demo storage stays local, while signed-in accounts can use a private Supabase library.
+- Saved-address search, deletion and undo; authenticated accounts use a private Supabase library.
 - Postcode format checks, authenticated official search/lookup, recipient-match confirmation and linking a verified code to dispatch output.
 - A reusable React checkout field, integration examples and a contact-redaction playground.
 
-Local extraction is a deterministic rule-based demo, not a trained AI model or verified building geocoder. Coverage measures extracted context groups, not accuracy. Bundled coordinates are locality centres; a dispatcher-confirmed pin is not official geospatial verification. No postcode is generated from a narrative address.
+Local extraction is a deterministic rule-based extractor, not a trained AI model or verified building geocoder. Coverage measures extracted context groups, not accuracy. Bundled coordinates are locality centres; a dispatcher-confirmed pin is not official geospatial verification. No postcode is generated from a narrative address.
 
 ## Supabase and NIPOST setup
 
@@ -47,11 +48,11 @@ npm run preview
 
 Deploy the generated `dist/` directory to a static host. Authentication redirects return to the application root with a PKCE code; configure the exact origin/path in Supabase Auth's redirect allowlist. Hash-based workspace routes need no server rewrites. Set public configuration before building. Deploy the Supabase function separately and allow the production origin in `WAKAPOINT_ALLOWED_ORIGINS`.
 
-## Privacy and demo scope
+## Privacy and operating scope
 
 Raw address text stays in the current form. Contact patterns are filtered before structured output, persistence and export, and human review remains required. Filtering is not a guarantee that every personal detail was found and does not establish NDPA compliance. Account email/profile data is handled by Supabase Auth. Onboarding preferences are user-editable metadata used only for interface defaults, never authorization.
 
-Demo addresses and account fallback libraries use separate browser storage keys. Signed-in cloud records are restricted to their owner through RLS. If cloud storage is unavailable, an account can use its own local fallback; records are not automatically migrated between the demo, fallback and cloud libraries. Concurrent tabs use library replacement semantics and can overwrite stale changes; multi-dispatcher collaboration is outside this submission's scope.
+The workspace starts empty, with zero metrics and no sample loaders. Signed-in cloud records are restricted to their owner through RLS. When cloud storage is unavailable, input and extracted results remain available for review/export; saving requires restoring the cloud connection. No local library fallback is used. Device theme preferences use localStorage; onboarding, tutorial and account theme preferences use Supabase Auth metadata. Concurrent tabs use library replacement semantics and can overwrite stale changes; multi-dispatcher collaboration is outside this submission's scope.
 
 Local logs, caches, previews, secrets and `codex-session.md` are excluded by `.gitignore`; source, tests, SQL, documentation, environment templates, the concept note and npm lockfile are included.
 

@@ -123,3 +123,18 @@
   .auth-emblem { display: none; }
   .auth-main { padding-top: 12px; }
 }
+/* Loading reflects the real session request; no artificial wait is added. */
+.auth-loading { width: min(100%,360px); margin: auto; text-align: center; animation: auth-arrive 180ms var(--ease-out) both; }
+.session-loader-mark { width: 48px; height: 48px; margin: 0 auto 24px; border: 1px solid #7775; border-radius: 12px; display: grid; place-items: center; }
+.session-loader-mark > span { width: 17px; height: 17px; border: 1px solid #aaa7; border-top-color: currentColor; border-radius: 50%; animation: session-spin 700ms linear infinite; }
+.session-loader-lines { margin: 27px auto 0; width: 220px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.session-loader-lines > span { position: relative; height: 7px; width: 100%; background: #8882; border-radius: 4px; overflow: hidden; }
+.session-loader-lines > span:nth-child(2) { width: 82%; }
+.session-loader-lines > span:nth-child(3) { width: 58%; }
+.session-loader-lines > span:after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg,transparent,#aaa3,transparent); animation: session-shimmer 1200ms linear infinite; transform: translateX(-100%); }
+@keyframes session-spin { to { transform: rotate(360deg); } }
+@keyframes session-shimmer { to { transform: translateX(100%); } }
+@keyframes auth-arrive { from { opacity: 0; } to { opacity: 1; } }
+@starting-style { .auth-content { opacity: 0; transform: translateY(6px); } }
+.auth-content { transition: opacity 200ms var(--ease-out),transform 200ms var(--ease-out); }
+@media(prefers-reduced-motion:reduce) { .session-loader-mark > span,.session-loader-lines > span:after { animation: none; } .auth-content { transition: opacity 150ms ease; transform: none; } }
