@@ -14,6 +14,8 @@ The workspace is a restrained geospatial desk: dark structural surfaces, clear b
 
 Functional data and navigation update immediately. Press feedback uses a small transform on pointer input. Dialog transitions use opacity/transform with a 200ms entrance and faster exit. Keyboard and reduced-motion modes remove movement. Hover styles are gated by pointer capability.
 
+The extended public landing page uses the supplied world-map image across the hero and navbar on tablets, laptops and desktops. Phones below 700px and touch-device landscape viewports below 1000px wide/500px high use the portrait globe image. Theme-specific overlays keep text readable; the wallpaper stays still. The navbar becomes solid when the hero leaves view. Section entrances play once using opacity/transform, FAQs use accessible accordion controls, and keyboard section navigation transfers focus immediately. The session loader uses CSS rotation/shimmer while the actual auth request is pending and stops motion when reduced motion is requested.
+
 Signup uses one email field followed by a single paste-friendly verification-code field. Google uses the provider's recognisable mark and its own redirect. Onboarding uses native labelled radio groups and a city select, with focus moving to the new step heading. Back navigation preserves selections.
 
 ## Mobile and accessibility

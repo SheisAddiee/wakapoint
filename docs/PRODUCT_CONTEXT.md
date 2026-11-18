@@ -7,11 +7,11 @@
 - **Confirmed point**: a dispatcher-selected map point explicitly labelled `dispatcher_confirmed`.
 - **Digital postcode**: official five-segment NIPOST identifier. Syntax checks do not prove existence or destination match.
 - **Linked postcode**: upstream existence check plus the user's recipient-match confirmation.
-- **Demo**: no-account local workspace, isolated from account storage and official service access.
-- **Account**: Supabase email-code/Google user, with owner-scoped cloud addresses. Browser fallback is keyed by user ID.
+- **Public landing**: product explanation and account entry; it grants no access to private workspace routes.
+- **Account**: Supabase email-code/Google user, with owner-scoped cloud addresses. There is no demo bypass or local address-library fallback.
 
-Confirmed preferences: React/TypeScript/Vite; monochrome technical workspace; mobile signup with Claude-like spacing; email and Google; separate SQL/backend folder; configuration through application environment values.
+Confirmed preferences: React/TypeScript/Vite; monochrome technical workspace; mobile signup with Claude-like spacing; email and Google; separate SQL/backend folder; configuration through application environment values; persistent light/dark themes; an extended landing page with features and FAQs; the supplied world-map wallpaper for desktop/tablets and globe photograph for phones, including the hero navbar.
 
-Onboarding records role, starting city and first task. Preferences live in Supabase user metadata for signed-in users and tab session storage for the demo. They affect interface defaults, not permissions. Role labels do not create administrator privileges.
+Onboarding records role, starting city and first task. Preferences and tutorial completion/skipping live in Supabase user metadata. Theme preferences persist on the device and sync to the account. These values affect interface defaults, not permissions. Role labels do not create administrator privileges.
 
-Cloud availability is optional for local extraction. Cloud/fallback/demo records are not silently merged. Upstream test and live datasets differ; the gateway cache namespaces each upstream key. Human review is required even when postcode existence is valid.
+Signed-in users can continue on-device extraction and reviewed exports when the cloud library is unavailable; saving requires restoring that connection. Upstream test and live datasets differ; the gateway cache namespaces each upstream key. Human review is required even when postcode existence is valid.

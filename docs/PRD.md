@@ -6,7 +6,7 @@ The user requested a black-and-grey geospatial workspace for the NIPOST Hackatho
 
 ## Required journeys
 
-1. A visitor signs in with email or Google, completes role/city/first-task onboarding, and enters their workspace. A labelled demo remains usable without hosted services.
+1. A visitor explores the public landing page, signs in with email or Google, completes role/city/first-task onboarding, and enters their workspace. All workspace routes require authentication; missing hosted configuration shows an actionable signup error.
 2. A dispatcher resolves an informal address, reviews extracted context and warnings, optionally confirms a pin, and exports after acknowledging review.
 3. A dispatcher processes up to 100 lines, reviews exceptions and exports CSV or JSON.
 4. A user saves, finds, reopens, deletes and restores a record in the appropriate library.
@@ -21,7 +21,9 @@ The user requested a black-and-grey geospatial workspace for the NIPOST Hackatho
 - Saved records, exports and gateway responses exclude common contact patterns and upstream owner fields.
 - Changed address input blocks saving/export of stale results. Changed postcode input discards old in-flight responses.
 - Unknown/conflicting localities surface review guidance, and map outages prevent new street-map pin placement.
-- Account and demo libraries remain separate; RLS owns the server authorization boundary.
+- The workspace starts empty and has no sample loaders or demo bypass; RLS restricts saved records to their authenticated owner.
+- Landing features, FAQs and role descriptions are functional; theme preferences persist across visits. Hero and navbar share the desktop wallpaper on tablets/larger devices and the mobile wallpaper on phones, with readable overlays in both themes.
+- Marketing entrances use opacity/transform, keyboard navigation is immediate, and reduced motion removes movement. Session loading reflects the actual auth request.
 - Relevant type, unit, build and browser checks pass, with hosted/physical-device limits reported separately.
 
 ## Boundaries
