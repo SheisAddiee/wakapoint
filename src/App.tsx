@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import WorkspaceApp from './WorkspaceApp';
 import { AuthFrame, AuthScreen } from './components/AuthScreen';
@@ -10,6 +10,7 @@ import { Toaster, toast } from 'sonner';
 import { WorkspaceTutorial } from './components/WorkspaceTutorial';
 import { LandingPage } from './components/LandingPage';
 import { ThemeProvider, useTheme } from './components/ThemeToggle';
+import { readPreviewSession, signInPreview, signOutPreview, updatePreviewSession } from './lib/previewAccount';
 
 function AppContent() {
   const [publicPage, setPublicPage] = useState(() => location.hash.slice(1));
@@ -20,7 +21,8 @@ function AppContent() {
   const activeAccount = useRef<string | null>(null);
   const [config] = useState(loadGateway);
   const [client] = useState(() => { try { return getSupabase(config); } catch { return null; } });
-  const [session, setSession] = useState<Session | null>(null), [initializing, setInitializing] = useState(!!client);
+  const previewAuth = !config.url && !config.publicKey && import.meta.env.VITE_ENABLE_PREVIEW_AUTH !== 'false';
+  const [session, setSession] = useState<Pick<Session, 'user'> | null>(() => previewAuth ? readPreviewSession() : null), [initializing, setInitializing] = useState(!!client);
   const [tutorialDismissed, setTutorialDismissed] = useState(false), [tutorialRequested, setTutorialRequested] = useState(false);
   const [error, setError] = useState(''), [leaving, setLeaving] = useState(false);
 
@@ -61,6 +63,7 @@ function AppContent() {
     if ((saved === 'light' || saved === 'dark') && saved !== theme) { syncingTheme.current = true; setTheme(saved); }
   }, [session?.user.id]);
   useEffect(() => {
+    if (previewAuth && session) { updatePreviewSession(session, { wakapoint_theme: theme }); return; }
     if (!session || !client || !themeAccount.current) return;
     if (syncingTheme.current) {
       if (theme === session.user.user_metadata?.wakapoint_theme) syncingTheme.current = false;
@@ -74,17 +77,20 @@ function AppContent() {
     return () => { cancelled = true; };
   }, [theme, session?.user.id, client]);
 
-  const preferences = readPreferences(session?.user.user_metadata?.wakapoint);
-  const leave = async () => {
+  const preferences = useMemo(() => readPreferences(session?.user.user_metadata?.wakapoint), [session?.user.user_metadata?.wakapoint]);
+  const openTutorial = useCallback(() => setTutorialRequested(true), []);
+  const leave = useCallback(async () => {
     if (leaving) return;
     setLeaving(true);
     try {
       if (client) { const { error: authError } = await client.auth.signOut({ scope: 'local' }); if (authError) throw authError; }
+      else if (previewAuth) signOutPreview();
       setSession(null); setTutorialDismissed(false); setTutorialRequested(false); setError(''); location.hash = ''; toast.success('You are signed out.');
     } catch { setError('Sign-out could not finish. Check your connection and retry.'); }
     finally { setLeaving(false); }
-  };
+  }, [client, leaving, previewAuth]);
   const complete = async (value: WorkspacePreferences) => {
+    if (previewAuth && session) { setSession(updatePreviewSession(session, { wakapoint: value })); location.hash = value.firstTask; toast.success('Your preview workspace is ready.'); return; }
     if (client && session) {
       const epoch = accountEpoch.current;
       const { data, error: authError } = await client.auth.updateUser({ data: { wakapoint: value } });
@@ -97,6 +103,7 @@ function AppContent() {
     setTutorialDismissed(true); setTutorialRequested(false);
     if (outcome === 'complete') toast.success('You are ready to resolve your first address.');
     else toast.info('Tutorial skipped. You can reopen it from Help anytime.');
+    if (previewAuth && session && preferences) { setSession(updatePreviewSession(session, { wakapoint: { ...preferences, tutorial: outcome } })); return; }
     if (client && session && preferences) {
       const epoch = accountEpoch.current;
       try {
@@ -108,9 +115,9 @@ function AppContent() {
 
   if (initializing) return <AuthFrame><div className="auth-loading" role="status"><div className="session-loader-mark" aria-hidden="true"><span/></div><span className="auth-eyebrow">WAKAPOINT</span><p>Opening your workspace…</p><div className="session-loader-lines" aria-hidden="true"><span/><span/><span/></div></div></AuthFrame>;
   if (publicPage === 'home' || (!session && !publicPage && !error)) return <LandingPage signedIn={!!session} onStart={() => { location.hash = 'signup'; }} onSignIn={() => { location.hash = 'signin'; }} onWorkspace={() => { location.hash = 'resolve'; }}/>;
-  if (!session) return <AuthScreen key={publicPage === 'signin' ? 'signin' : 'signup'} initialMode={publicPage === 'signin' ? 'signin' : 'signup'} client={client} initialError={error}/>;
+  if (!session) return <AuthScreen key={publicPage === 'signin' ? 'signin' : 'signup'} initialMode={publicPage === 'signin' ? 'signin' : 'signup'} client={client} initialError={error} onPreviewSignIn={previewAuth ? email => { const next = signInPreview(email); accountEpoch.current += 1; activeAccount.current = next.user.id; setSession(next); setTutorialDismissed(false); setTutorialRequested(false); setError(''); location.hash = 'resolve'; } : undefined}/>;
   if (!preferences) return <Onboarding onComplete={complete} onBack={() => { void leave(); }}/>;
-  return <><WorkspaceApp key={session.user.id} gatewayConfig={config} preferences={preferences} accountLabel={session.user.email || 'WakaPoint account'} onSignOut={() => void leave()} signingOut={leaving} onTutorial={() => setTutorialRequested(true)}/><WorkspaceTutorial open={tutorialRequested || (!preferences.tutorial && !tutorialDismissed)} onFinish={finishTutorial}/>{error && <div className="account-error" role="alert">{error}<button className="auth-text-button" onClick={() => setError('')}>Dismiss</button></div>}</>;
+  return <><WorkspaceApp key={session.user.id} gatewayConfig={config} preferences={preferences} previewAccountId={previewAuth ? session.user.id : undefined} accountLabel={session.user.email || 'WakaPoint account'} onSignOut={leave} signingOut={leaving} onTutorial={openTutorial}/><WorkspaceTutorial open={tutorialRequested || (!preferences.tutorial && !tutorialDismissed)} onFinish={finishTutorial}/>{error && <div className="account-error" role="alert">{error}<button className="auth-text-button" onClick={() => setError('')}>Dismiss</button></div>}</>;
 }
 
 export default function App() {

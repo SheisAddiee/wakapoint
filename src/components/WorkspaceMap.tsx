@@ -1,3 +1,4 @@
+import { SpecularButton } from "./reactbits/SpecularButton";
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -46,7 +47,7 @@ export function WorkspaceMap({ result, point, onConfirm }: Props) {
       <div className="map-zoom"><button aria-label="Zoom in" onClick={() => map.current?.zoomIn()}><Plus size={17}/></button><button aria-label="Zoom out" onClick={() => map.current?.zoomOut()}><Minus size={17}/></button><button aria-label="Recenter map" onClick={() => map.current?.setView(point ? [point.latitude, point.longitude] : location ? [location.latitude, location.longitude] : [9.0765, 7.3986], point ? 16 : 13, { animate: false })}><Crosshair size={17}/></button></div>
       <div className="compass"><span>N</span><svg width="18" height="27" viewBox="0 0 18 27"><path d="M9 0L17 25L9 18L1 25Z" fill="#b8bfc7"/><path d="M9 0V18L1 25Z" fill="#5c646e"/></svg></div>
       {picking && <div className="pin-instruction"><Crosshair size={16}/><span>Click the map, or use arrow keys then Enter, to place a point</span><button className="icon-button" aria-label="Cancel placing point" onClick={() => { setPicking(false); setCandidate(null); }}><X size={15}/></button></div>}
-      {candidate && <div className="candidate-card"><div><strong>Confirm the delivery point</strong><p>{candidate[0].toFixed(6)}, {candidate[1].toFixed(6)}</p></div><button ref={confirmButton} className="button primary small" onClick={() => { onConfirm({ latitude: candidate[0], longitude: candidate[1], source: 'dispatcher_confirmed' }); setPicking(false); setCandidate(null); }}><Check size={15}/>Confirm point</button></div>}
+      {candidate && <div className="candidate-card"><div><strong>Confirm the delivery point</strong><p>{candidate[0].toFixed(6)}, {candidate[1].toFixed(6)}</p></div><SpecularButton ref={confirmButton} className="button primary small" onClick={() => { onConfirm({ latitude: candidate[0], longitude: candidate[1], source: 'dispatcher_confirmed' }); setPicking(false); setCandidate(null); }}><Check size={15}/>Confirm point</SpecularButton></div>}
       
     </div>
     <div className="map-footer"><div><span className="eyebrow">{point ? 'CONFIRMED COORDINATES' : 'APPROXIMATE LOCALITY'}</span><span className="coordinate-text">{point ? `${point.latitude.toFixed(5)}° N  ${point.longitude.toFixed(5)}° E` : location ? `${location.latitude.toFixed(4)}° N  ${location.longitude.toFixed(4)}° E` : 'No location detected'}</span></div><button className="button secondary small" disabled={!location || (!point && !tilesLoaded)} onClick={() => { if (point) onConfirm(null); else { setPicking(v => !v); host.current?.focus(); } }}><MapPin size={14}/>{point ? 'Reset point' : 'Place delivery pin'}</button></div>

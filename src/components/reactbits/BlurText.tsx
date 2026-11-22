@@ -20,7 +20,7 @@ export function BlurText({ text, className = '' }: { text: string; className?: s
     return () => { observer.disconnect(); reduced.removeEventListener('change', reveal); };
   }, []);
   return <span ref={ref} className={`rb-blur-text ${className}`} aria-label={text} data-revealed={visible}>
-    {words.map((word, index) => <span key={`${index}-${word}`} aria-hidden="true" style={{ transitionDelay: `${Math.min(index * 20, 80)}ms` }}>
+    {words.map((word, index) => <span key={`${index}-${word}`} aria-hidden="true" style={{ transitionDelay: `${Math.min(index * 45, 220)}ms` }}>
       {word}{index < words.length - 1 ? '\u00a0' : ''}
     </span>)}
   </span>;

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The public landing page leads to signup or sign-in. Email verification codes and Google sign-in require Supabase configuration; all workspace routes require an authenticated account.
+Open http://localhost:3000. The public landing page leads to signup or sign-in. When Supabase is not configured, any valid email opens a temporary preview account on this device; the Google button opens a preview profile. Real email-code/Google authentication takes over when Supabase is configured. Set VITE_ENABLE_PREVIEW_AUTH=false to disable preview entry.
 
 ## What works
 
@@ -53,7 +53,7 @@ Deploy the generated `dist/` directory to a static host. Authentication redirect
 
 Raw address text stays in the current form. Contact patterns are filtered before structured output, persistence and export, and human review remains required. Filtering is not a guarantee that every personal detail was found and does not establish NDPA compliance. Account email/profile data is handled by Supabase Auth. Onboarding preferences are user-editable metadata used only for interface defaults, never authorization.
 
-The workspace starts empty, with zero metrics and no sample loaders. Signed-in cloud records are restricted to their owner through RLS. When cloud storage is unavailable, input and extracted results remain available for review/export; saving requires restoring the cloud connection. No local library fallback is used. Device theme preferences use localStorage; onboarding, tutorial and account theme preferences use Supabase Auth metadata. Concurrent tabs use library replacement semantics and can overwrite stale changes; multi-dispatcher collaboration is outside this submission's scope.
+The workspace starts empty, with zero metrics and no sample loaders. Preview profiles, onboarding and saved addresses persist separately by email on this browser. Configured Supabase accounts use owner-restricted cloud records through RLS. When cloud storage is unavailable, input and extracted results remain available for review/export; saving requires restoring the cloud connection. No local library fallback is used. Device theme preferences use localStorage; onboarding, tutorial and account theme preferences use Supabase Auth metadata. Concurrent tabs use library replacement semantics and can overwrite stale changes; multi-dispatcher collaboration is outside this submission's scope.
 
 Local logs, caches, previews, secrets and `codex-session.md` are excluded by `.gitignore`; source, tests, SQL, documentation, environment templates, the concept note and npm lockfile are included.
 

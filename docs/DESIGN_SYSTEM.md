@@ -28,16 +28,16 @@ Automated viewport checks can verify layout and semantics. Safe-area behaviour, 
 
 ## React Bits integration
 
-The public landing uses adapted [BlurText](https://reactbits.dev/text-animations/blur-text), [SpotlightCard](https://reactbits.dev/components/spotlight-card), [CircularText](https://reactbits.dev/text-animations/circular-text) and [SpecularButton](https://reactbits.dev/components/specular-button). SpecularButton also supplies the email/verification submit controls. Components preserve the existing monochrome palette, semantic buttons, form validation, disabled/loading states and keyboard focus. The dashboard retains its functional, immediate interactions.
+The public landing uses adapted [BlurText](https://reactbits.dev/text-animations/blur-text), [SpotlightCard](https://reactbits.dev/components/spotlight-card), [CircularText](https://reactbits.dev/text-animations/circular-text) and [SpecularButton](https://reactbits.dev/components/specular-button). SpecularButton also supplies the email/verification submit controls. Components preserve the existing monochrome palette, semantic buttons, form validation, disabled/loading states and keyboard focus. Shared SpecularButton controls and SpotlightCard panels also appear throughout the dashboard, batch, saved-address, postcode, developer, privacy, onboarding and tutorial screens. Functional data remains still.
 
-The hero's satellite label rotates with CSS while visible, with an occasional airplane following a dotted path on desktop. Phone ornament is smaller. Motion pauses offscreen/in hidden tabs; reduced motion leaves a static illustration. The airplane theme sweep uses native View Transitions and a shared 450ms timing. Keyboard toggles, reduced motion and browsers without View Transitions apply the theme immediately. A second toggle cancels the current sweep.
+The hero's satellite label rotates with CSS while visible, with an occasional airplane following a dotted path on desktop. Phone ornament is smaller. Motion pauses offscreen/in hidden tabs; reduced motion leaves a static illustration. The airplane theme sweep uses native View Transitions and an 850ms wavy clip that reveals the newly themed page. Text and controls remain visible throughout, without a blank color cover. Keyboard toggles, reduced motion and browsers without View Transitions apply the theme immediately. A second toggle, navigation, typing or scrolling cancels the current sweep. The visible theme pill displays the selected mode.
 
 | Element | Role | Starts | Duration | Motion | Relationship |
 | --- | --- | --- | --- | --- | --- |
-| Headline words | Lead | On first view, 20ms word steps capped at 80ms | 280ms | 2px blur, opacity and 5px translation | Short overlapping reveal |
-| Supporting copy | Support | 40ms | 280ms | Opacity and small translation | Overlaps headline |
-| Hero actions | Support | 80ms | 280ms | Opacity and small translation | Overlaps copy; immediately clickable |
-| Airplane theme sweep | Lead | Pointer theme toggle | 450ms | Horizontal transform | Together with theme reveal |
-| Theme snapshot | Support | Same toggle | 450ms | Horizontal clip | Revealed behind airplane |
+| Headline words | Lead | On first view, 45ms word steps capped at 220ms | 550ms | 2px blur, opacity and 5px translation | Short overlapping reveal |
+| Supporting copy | Support | 80ms | 500ms | Opacity and small translation | Overlaps headline |
+| Hero actions | Support | 130ms | 500ms | Opacity and small translation | Overlaps copy; immediately clickable |
+| Airplane theme sweep | Lead | Pointer theme toggle | 850ms | Horizontal transform | Together with theme reveal |
+| Theme snapshot | Support | Same toggle | 850ms | Wavy clip | Revealed behind airplane |
 
 Background photographs and functional data stay still. Pointer highlights use small, fixed gradients with direct transforms and no React rendering per frame. BlurText uses CSS rather than introducing Motion's component runtime for a predetermined reveal. Sources and the full React Bits license are recorded in `THIRD_PARTY_NOTICES.md`.

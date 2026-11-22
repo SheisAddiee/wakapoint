@@ -153,12 +153,12 @@
 .landing-skip:focus { transform: translateY(0); }
 
 /* One entrance per section; simple motion stays off the React render loop. */
-.landing [data-reveal] { opacity: 1; transform: translateY(0); transition: opacity 280ms var(--ease-out),transform 280ms var(--ease-out); }
-.landing [data-visible="false"] { opacity: 0; transform: translateY(10px); }
+.landing [data-reveal] { opacity: 1; transform: translateY(0); transition: opacity 500ms var(--ease-out),transform 500ms var(--ease-out); }
+.landing [data-visible="false"] { opacity: 0; transform: translateY(18px); }
 .landing [data-reveal]:focus-within { opacity: 1; transform: none; }
 .landing [data-instant="true"] { transition: none; }
-.landing-hero > p { animation: landing-support 280ms var(--ease-out) 40ms both; }
-.landing-hero-actions { animation: landing-support 280ms var(--ease-out) 80ms both; }
+.landing-hero > p { animation: landing-support 500ms var(--ease-out) 80ms both; }
+.landing-hero-actions { animation: landing-support 500ms var(--ease-out) 130ms both; }
 .landing-hero > .landing-kicker,.landing-account-note { animation: landing-fade 400ms var(--ease-out) both; }
 .landing button { touch-action: manipulation; }
 .landing-how-link,.landing-signin,.landing-nav nav button { transition: color 160ms ease; }
@@ -210,7 +210,7 @@
 
 /* React Bits details, adapted to the existing editorial layout. */
 .rb-blur-text { display: inline; }
-.rb-blur-text > span { display: inline-block; opacity: 0; filter: blur(2px); transform: translateY(5px); transition: opacity 280ms var(--ease-out),filter 280ms var(--ease-out),transform 280ms var(--ease-out); }
+.rb-blur-text > span { display: inline-block; opacity: 0; filter: blur(2px); transform: translateY(5px); transition: opacity 550ms var(--ease-out),filter 550ms var(--ease-out),transform 550ms var(--ease-out); }
 .rb-blur-text[data-revealed="true"] > span { opacity: 1; filter: blur(0); transform: none; }
 .rb-spotlight { position: relative; isolation: isolate; overflow: hidden; }
 .rb-spotlight-light { position: absolute; left: -160px; top: -160px; width: 320px; height: 320px; border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0; background: radial-gradient(circle,rgb(255 255 255 / 7%),transparent 70%); transition: opacity 180ms ease; }

@@ -100,3 +100,34 @@ html[data-theme-flight]::view-transition-new(wakapoint-flight) { animation: them
 @keyframes theme-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 @keyframes theme-plane-cross { from { transform: translateX(-90px); } to { transform: translateX(calc(100vw + 90px)); } }
 @media(prefers-reduced-motion:reduce) { .theme-flight { display: none; } html[data-theme-flight]::view-transition-new(root) { animation: none; } }
+
+.theme-toggle { width: auto; min-width: 88px; height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 6px 10px 6px 6px; border-radius: 999px; border-color: #7776; background: #ffffff0a; flex-shrink: 0; }
+.theme-toggle-icon { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: #ecebe5; color: #282824; }
+.theme-toggle-state { font-size: 10px; font-weight: 600; letter-spacing: .2px; }
+.light .theme-toggle { background: #28282408; }
+.light .theme-toggle-icon { background: #282824; color: #f6f5f1; }
+.specular-button .specular-label { width: 100%; }
+.resolve-button .specular-label { justify-content: space-between; }
+@media(max-width:700px) { .theme-toggle { min-width: 78px; gap: 5px; padding-right: 8px; } .topbar-actions { gap: 9px; } .breadcrumbs { min-width: 0; } .breadcrumbs strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+
+
+/* Reveal the next theme's content through a wave; both snapshots retain the page. */
+.theme-flight { position: fixed; left: 0; top: 42vh; width: 90px; height: 68px; pointer-events: none; view-transition-name: wakapoint-flight; color: #282824; }
+.theme-flight[data-destination="dark"] { color: #ecebe5; }
+.theme-flight > svg { transform: rotate(45deg); }
+.theme-flight > span { position: absolute; right: 63px; top: 29px; width: 100px; height: 1px; background: linear-gradient(90deg,transparent,currentColor); }
+html[data-theme-flight]::view-transition { pointer-events: none; }
+html[data-theme-flight]::view-transition-group(root),html[data-theme-flight]::view-transition-group(wakapoint-flight) { animation-duration: 0s; }
+html[data-theme-flight]::view-transition-old(root) { animation: none; mix-blend-mode: normal; }
+html[data-theme-flight]::view-transition-new(root) { animation: theme-wave-reveal 850ms var(--ease-out) both; mix-blend-mode: normal; }
+html[data-theme-flight]::view-transition-old(wakapoint-flight) { display: none; }
+html[data-theme-flight]::view-transition-new(wakapoint-flight) { animation: theme-plane-cross 850ms var(--ease-out) both; }
+@keyframes theme-plane-cross { from { transform: translateX(-90px); } to { transform: translateX(calc(100vw + 90px)); } }
+@keyframes theme-wave-reveal {
+  0% { clip-path: polygon(0% 0%,-8.00% 0.000%,-6.47% 3.125%,-5.17% 6.250%,-4.30% 9.375%,-4.00% 12.500%,-4.30% 15.625%,-5.17% 18.750%,-6.47% 21.875%,-8.00% 25.000%,-9.53% 28.125%,-10.83% 31.250%,-11.70% 34.375%,-12.00% 37.500%,-11.70% 40.625%,-10.83% 43.750%,-9.53% 46.875%,-8.00% 50.000%,-6.47% 53.125%,-5.17% 56.250%,-4.30% 59.375%,-4.00% 62.500%,-4.30% 65.625%,-5.17% 68.750%,-6.47% 71.875%,-8.00% 75.000%,-9.53% 78.125%,-10.83% 81.250%,-11.70% 84.375%,-12.00% 87.500%,-11.70% 90.625%,-10.83% 93.750%,-9.53% 96.875%,-8.00% 100.000%,0% 100%); }
+  25% { clip-path: polygon(0% 0%,25.00% 0.000%,24.70% 3.125%,23.83% 6.250%,22.53% 9.375%,21.00% 12.500%,19.47% 15.625%,18.17% 18.750%,17.30% 21.875%,17.00% 25.000%,17.30% 28.125%,18.17% 31.250%,19.47% 34.375%,21.00% 37.500%,22.53% 40.625%,23.83% 43.750%,24.70% 46.875%,25.00% 50.000%,24.70% 53.125%,23.83% 56.250%,22.53% 59.375%,21.00% 62.500%,19.47% 65.625%,18.17% 68.750%,17.30% 71.875%,17.00% 75.000%,17.30% 78.125%,18.17% 81.250%,19.47% 84.375%,21.00% 87.500%,22.53% 90.625%,23.83% 93.750%,24.70% 96.875%,25.00% 100.000%,0% 100%); }
+  50% { clip-path: polygon(0% 0%,50.00% 0.000%,48.47% 3.125%,47.17% 6.250%,46.30% 9.375%,46.00% 12.500%,46.30% 15.625%,47.17% 18.750%,48.47% 21.875%,50.00% 25.000%,51.53% 28.125%,52.83% 31.250%,53.70% 34.375%,54.00% 37.500%,53.70% 40.625%,52.83% 43.750%,51.53% 46.875%,50.00% 50.000%,48.47% 53.125%,47.17% 56.250%,46.30% 59.375%,46.00% 62.500%,46.30% 65.625%,47.17% 68.750%,48.47% 71.875%,50.00% 75.000%,51.53% 78.125%,52.83% 81.250%,53.70% 84.375%,54.00% 87.500%,53.70% 90.625%,52.83% 93.750%,51.53% 96.875%,50.00% 100.000%,0% 100%); }
+  75% { clip-path: polygon(0% 0%,75.00% 0.000%,75.30% 3.125%,76.17% 6.250%,77.47% 9.375%,79.00% 12.500%,80.53% 15.625%,81.83% 18.750%,82.70% 21.875%,83.00% 25.000%,82.70% 28.125%,81.83% 31.250%,80.53% 34.375%,79.00% 37.500%,77.47% 40.625%,76.17% 43.750%,75.30% 46.875%,75.00% 50.000%,75.30% 53.125%,76.17% 56.250%,77.47% 59.375%,79.00% 62.500%,80.53% 65.625%,81.83% 68.750%,82.70% 71.875%,83.00% 75.000%,82.70% 78.125%,81.83% 81.250%,80.53% 84.375%,79.00% 87.500%,77.47% 90.625%,76.17% 93.750%,75.30% 96.875%,75.00% 100.000%,0% 100%); }
+  100% { clip-path: polygon(0% 0%,108.00% 0.000%,109.53% 3.125%,110.83% 6.250%,111.70% 9.375%,112.00% 12.500%,111.70% 15.625%,110.83% 18.750%,109.53% 21.875%,108.00% 25.000%,106.47% 28.125%,105.17% 31.250%,104.30% 34.375%,104.00% 37.500%,104.30% 40.625%,105.17% 43.750%,106.47% 46.875%,108.00% 50.000%,109.53% 53.125%,110.83% 56.250%,111.70% 59.375%,112.00% 62.500%,111.70% 65.625%,110.83% 68.750%,109.53% 71.875%,108.00% 75.000%,106.47% 78.125%,105.17% 81.250%,104.30% 84.375%,104.00% 87.500%,104.30% 90.625%,105.17% 93.750%,106.47% 96.875%,108.00% 100.000%,0% 100%); }
+}
+@media(prefers-reduced-motion:reduce) { .theme-flight { display: none; } html[data-theme-flight]::view-transition-new(root) { animation: none; } }

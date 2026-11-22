@@ -1,9 +1,9 @@
 // Adapted from React Bits SpecularButton (reactbits.dev/components/specular-button).
 // A fixed gradient replaces the shader while preserving the pointer highlight,
 // native button semantics and WakaPoint's existing sizes/colors.
-import { useRef, type ButtonHTMLAttributes } from 'react';
+import { useRef, type ComponentPropsWithRef } from 'react';
 
-export function SpecularButton({ children, className = '', type = 'button', disabled, onPointerMove, onPointerLeave, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function SpecularButton({ children, className = '', type = 'button', disabled, onPointerMove, onPointerLeave, ...props }: ComponentPropsWithRef<'button'>) {
   const light = useRef<HTMLSpanElement>(null);
   return <button {...props} type={type} disabled={disabled} className={`specular-button ${className}`}
     onPointerMove={event => {
