@@ -10,7 +10,7 @@ async function emailSignIn(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Verify email' }).click();
 }
 
-test('landing leads to mobile signup and protects private routes without a bypass', async ({ page }) => {
+test('landing leads to mobile preview signup and protects configured private routes', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Local directions. A clearer way forward.' })).toBeVisible();
@@ -18,16 +18,17 @@ test('landing leads to mobile signup and protects private routes without a bypas
   await expect(page.getByRole('heading', { name: 'Good directions. Better deliveries.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
   await expect(page.getByLabel('Email address')).toHaveCSS('font-size', '16px');
-  await expect(page.getByRole('button', { name: /demo/i })).toHaveCount(0);
-  await page.getByLabel('Email address').fill(email);
-  await page.getByRole('button', { name: 'Continue with email' }).click();
-  await expect(page.getByRole('alert')).toContainText('sign-in is unavailable');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible();
   await page.getByRole('button', { name: 'How we handle your data' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Got it', exact: true }).click();
-  await page.goto('/#saved', { waitUntil: 'domcontentloaded' });
+  await page.getByLabel('Email address').fill(email);
+  await page.getByRole('button', { name: 'Continue with email' }).click();
+  await expect(page.getByRole('heading', { name: /A workspace that/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Get started with WakaPoint' })).toBeVisible();
+  await page.goto(origin + '/#saved', { waitUntil: 'domcontentloaded' });
   await expect(page.getByLabel('Email address')).toBeVisible();
   await expect(page.getByLabel('Where are we delivering?')).toHaveCount(0);
 });
