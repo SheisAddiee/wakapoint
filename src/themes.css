@@ -86,15 +86,17 @@
 .light .map-unavailable { background: #efeee8; color: #66645a; }
 @media (hover:hover) and (pointer:fine) { .light .button.secondary:hover,.light .icon-button:hover { background: #e5e3d9; color: #242420; } .light .button.primary:hover { background: #43433b; color: #fff; } .light .nav-item:hover:not(.active) { background: #e6e4da; color: #2d2c24; } }
 @media(max-width:700px) { .auth-header > .theme-toggle { position: absolute; right: 23px; top: max(20px,env(safe-area-inset-top)); } .tutorial-popup h2 { font-size: 26px; } .tutorial-top { gap: 10px; } .cloud-error { align-items: flex-start; flex-wrap: wrap; } }
-.theme-flight { position: fixed; left: -90px; top: 42vh; width: 90px; height: 68px; pointer-events: none; view-transition-name: wakapoint-flight; color: #282824; }
+.theme-flight { position: fixed; left: 0; top: 42vh; width: 90px; height: 68px; pointer-events: none; view-transition-name: wakapoint-flight; color: #282824; }
 .theme-flight[data-destination="dark"] { color: #ecebe5; }
 .theme-flight > svg { transform: rotate(45deg); }
 .theme-flight > span { position: absolute; right: 63px; top: 29px; width: 100px; height: 1px; background: linear-gradient(90deg,transparent,currentColor); }
+html[data-theme-flight]::view-transition { pointer-events: none; }
+html[data-theme-flight] { --theme-flight-duration: 450ms; }
 html[data-theme-flight]::view-transition-group(root),html[data-theme-flight]::view-transition-group(wakapoint-flight) { animation-duration: 0s; }
 html[data-theme-flight]::view-transition-old(root) { animation: none; mix-blend-mode: normal; }
-html[data-theme-flight]::view-transition-new(root) { animation: theme-reveal 850ms var(--ease-out) both; mix-blend-mode: normal; }
+html[data-theme-flight]::view-transition-new(root) { animation: theme-reveal var(--theme-flight-duration) var(--ease-out) both; mix-blend-mode: normal; }
 html[data-theme-flight]::view-transition-old(wakapoint-flight) { display: none; }
-html[data-theme-flight]::view-transition-new(wakapoint-flight) { animation: theme-plane-cross 850ms var(--ease-out) both; }
+html[data-theme-flight]::view-transition-new(wakapoint-flight) { animation: theme-plane-cross var(--theme-flight-duration) var(--ease-out) both; }
 @keyframes theme-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
-@keyframes theme-plane-cross { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 180px)); } }
+@keyframes theme-plane-cross { from { transform: translateX(-90px); } to { transform: translateX(calc(100vw + 90px)); } }
 @media(prefers-reduced-motion:reduce) { .theme-flight { display: none; } html[data-theme-flight]::view-transition-new(root) { animation: none; } }

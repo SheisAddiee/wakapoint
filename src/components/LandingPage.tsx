@@ -5,6 +5,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { BlurText } from './reactbits/BlurText';
 import { SpotlightCard } from './reactbits/SpotlightCard';
 import { HeroOrbit } from './HeroOrbit';
+import { SpecularButton } from './reactbits/SpecularButton';
 
 const features = [
   { icon: Fingerprint, title: 'Address intelligence', text: 'Give landmarks, building identifiers and local delivery cues their own place. Keep the details that make an address useful.', note: 'From a description to structured context' },
@@ -63,7 +64,7 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
     <header className="landing-nav" data-over-hero={overHero}>
       <a className="auth-brand" href="#home" aria-label="WakaPoint home"><Navigation2 size={25} strokeWidth={1.5}/><span>WakaPoint<span>.</span></span></a>
       <nav aria-label="Page sections"><button onClick={e => scrollTo('how-it-works', e.detail > 0)}>How it works</button><button onClick={e => scrollTo('landing-features', e.detail > 0)}>Features</button><button onClick={e => scrollTo('landing-faq', e.detail > 0)}>FAQs</button></nav>
-      <div className="landing-nav-actions"><ThemeToggle flight/>{signedIn ? <button className="button primary" onClick={onWorkspace}>Open workspace <ArrowRight size={15}/></button> : <button className="landing-signin" onClick={onSignIn}>Sign in <ArrowUpRight size={14}/></button>}</div>
+      <div className="landing-nav-actions"><ThemeToggle flight/>{signedIn ? <SpecularButton className="button primary" onClick={onWorkspace}>Open workspace <ArrowRight size={15}/></SpecularButton> : <><button className="landing-signin" onClick={onSignIn}>Sign in <ArrowUpRight size={14}/></button><SpecularButton className="button primary landing-signup" onClick={onStart}>Sign up <ArrowRight size={14}/></SpecularButton></>}</div>
     </header>
     <main id="landing-main">
       <section className="landing-hero">
@@ -71,7 +72,7 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
         <div className="landing-kicker"><span/>BUILT FOR THE NIGERIAN LAST MILE</div>
         <h1 aria-label="Local directions. A clearer way forward.">Local directions.<br/><BlurText text="A clearer way forward."/></h1>
         <p>Behind the school. Beside the market. Through the green gate.<br className="desktop-break"/> Turn the way people describe places into context your delivery team can use.</p>
-        <div className="landing-hero-actions"><button className="button primary" onClick={start}>{signedIn ? 'Open your workspace' : 'Get started with WakaPoint'}<ArrowRight size={17}/></button><button className="landing-how-link" onClick={e => scrollTo('how-it-works', e.detail > 0)}>See how it works <ArrowDown size={15}/></button></div>
+        <div className="landing-hero-actions"><SpecularButton className="button primary" onClick={start}>{signedIn ? 'Open your workspace' : 'Get started with WakaPoint'}<ArrowRight size={17}/></SpecularButton><button className="landing-how-link" onClick={e => scrollTo('how-it-works', e.detail > 0)}>See how it works <ArrowDown size={15}/></button></div>
         <div className="landing-account-note"><ShieldCheck size={13}/>Your account. Your address library. Your next delivery.</div>
         <div className="landing-flow" data-reveal aria-label="Describe a destination, extract context, review and hand off">
           <div><span className="flow-number">01</span><Navigation2 size={25} strokeWidth={1.2}/><strong>The local description</strong><small>A city, a landmark, a final detail.</small></div><ArrowRight className="flow-arrow" size={22}/>
@@ -112,7 +113,7 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
         <div><span className="landing-kicker">A FEW THINGS, MADE CLEAR</span><h2>Good questions.<br/>Clear answers.</h2><p>Understand the tools before your first delivery.</p><button className="landing-how-link" onClick={start}>Get started <ArrowUpRight size={15}/></button></div>
         <Accordion.Root className="faq-list">{faqs.map(({ question, answer }, index) => <Accordion.Item value={question} key={question} className="faq-item"><Accordion.Header><Accordion.Trigger className="faq-trigger" onClick={event => setInstantFaq(event.detail === 0)}><span className="landing-section-index">{String(index + 1).padStart(2, '0')}</span><span>{question}</span><ChevronDown size={17}/></Accordion.Trigger></Accordion.Header><Accordion.Panel className="faq-panel"><p>{answer}</p></Accordion.Panel></Accordion.Item>)}</Accordion.Root>
       </section>
-      <section className="landing-closing" data-reveal><span className="landing-kicker">A WAY FORWARD FOR EVERY ADDRESS</span><Navigation2 className="closing-mark" size={45} strokeWidth={1}/><h2>Start with an address.<br/>Make the next step clearer.</h2><button className="button primary" onClick={start}>{signedIn ? 'Return to your workspace' : 'Create your account'}<ArrowRight size={17}/></button><p>Email or Google sign-in. Guided setup. A private workspace.</p></section>
+      <section className="landing-closing" data-reveal><span className="landing-kicker">A WAY FORWARD FOR EVERY ADDRESS</span><Navigation2 className="closing-mark" size={45} strokeWidth={1}/><h2>Start with an address.<br/>Make the next step clearer.</h2><SpecularButton className="button primary" onClick={start}>{signedIn ? 'Return to your workspace' : 'Create your account'}<ArrowRight size={17}/></SpecularButton><p>Email or Google sign-in. Guided setup. A private workspace.</p></section>
     </main>
     <footer className="landing-footer"><a className="auth-brand" href="#home"><Navigation2 size={20} strokeWidth={1.5}/><span>WakaPoint<span>.</span></span></a><span>Designed for the way Nigeria gives directions.</span><a href="https://docs.postcode.gov.ng/" target="_blank" rel="noreferrer">NIPOST documentation <ArrowUpRight size={13}/></a></footer>
   </div>;

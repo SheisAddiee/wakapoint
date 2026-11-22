@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Plane, Satellite } from 'lucide-react';
 
+// Circular label placement adapted from React Bits CircularText; CSS drives the
+// decorative ring instead of a render loop. See THIRD_PARTY_NOTICES.md.
 const orbitText = Array.from('WAKAPOINT · LOCAL KNOWLEDGE · ');
 
 export function HeroOrbit({ paused }: { paused: boolean }) {

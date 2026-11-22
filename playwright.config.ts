@@ -14,13 +14,13 @@ export default defineConfig({
       command: 'npm run dev -- --host 127.0.0.1 --port 4173',
       url: 'http://127.0.0.1:4173',
       env: { WAKAPOINT_VITE_CACHE_DIR: 'node_modules/.vite-test-blank', VITE_SUPABASE_URL: '', VITE_SUPABASE_PUBLISHABLE_KEY: '' },
-      timeout: 60000,
+      timeout: 180000,
     },
     {
       command: 'npm run dev -- --host 127.0.0.1 --port 4174',
       url: 'http://127.0.0.1:4174',
       env: { WAKAPOINT_VITE_CACHE_DIR: 'node_modules/.vite-test-cloud', VITE_SUPABASE_URL: 'https://wakapoint-test.supabase.co', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_synthetic_test_key' },
-      timeout: 60000,
+      timeout: 180000,
     },
   ],
 });

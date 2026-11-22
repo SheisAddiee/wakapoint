@@ -138,3 +138,11 @@
 @starting-style { .auth-content { opacity: 0; transform: translateY(6px); } }
 .auth-content { transition: opacity 200ms var(--ease-out),transform 200ms var(--ease-out); }
 @media(prefers-reduced-motion:reduce) { .session-loader-mark > span,.session-loader-lines > span:after { animation: none; } .auth-content { transition: opacity 150ms ease; transform: none; } }
+.specular-button { position: relative; isolation: isolate; overflow: hidden; box-shadow: inset 0 1px 0 rgb(255 255 255 / 24%); }
+.specular-label { position: relative; z-index: 1; display: inline-flex; justify-content: center; align-items: center; gap: inherit; }
+.specular-light { position: absolute; top: -80px; left: -80px; width: 160px; height: 160px; border-radius: 50%; pointer-events: none; opacity: 0; background: radial-gradient(circle,rgb(255 255 255 / 65%),transparent 65%); transition: opacity 160ms ease; }
+.light .specular-light { background: radial-gradient(circle,rgb(255 255 255 / 18%),transparent 65%); }
+.specular-button:disabled .specular-light { display: none; }
+.specular-label > svg { transition: transform 160ms var(--ease-out); }
+@media (hover:hover) and (pointer:fine) { .specular-button:hover:not(:disabled) .specular-label > svg { transform: translateX(3px); } }
+@media(prefers-reduced-motion:reduce) { .specular-light { display: none; } .specular-label > svg { transition: none; } }

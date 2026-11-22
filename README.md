@@ -17,6 +17,7 @@ Open http://localhost:3000. The public landing page leads to signup or sign-in. 
 
 - Public landing page, mobile signup, sign-in, verification-code entry, session restoration, sign-out, three-step onboarding and a skippable guided tutorial.
 - Persistent light/dark themes on the landing page, account screens and workspace.
+- Adapted React Bits text reveals, feature spotlights, satellite ornament and signup/action buttons, plus an airplane theme sweep with immediate keyboard/reduced-motion alternatives. See [component notices](THIRD_PARTY_NOTICES.md).
 - On-device rule extraction of localities, landmarks, building identifiers, units and ordered delivery cues.
 - Interactive map with approximate locality centres, reviewed delivery pins and a connection message when street tiles are unavailable.
 - Batch processing of up to 100 addresses, filters, pagination, reviewed CSV/JSON exports and spreadsheet formula protection.
