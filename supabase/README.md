@@ -17,7 +17,9 @@ invalid-payload/foreign-ID rollback, notification deduplication/read permissions
 anonymous rejection and private-RPC denial. No fixture accounts remain; no emails
 were sent. Local handler tests use synthetic credentials and mock providers.
 
-Google is enabled in the live project; real consent/callback testing is pending.
+Google is enabled in the live project. Google rejected the configured client secret
+with invalid_client on 23 November; replace it with the matching Web client secret
+value before real consent/callback verification.
 Resend and NIPOST still require activation below. The connected Vercel account does not expose
 the WakaPoint hosting project; its owner must set public build variables.
 
@@ -41,8 +43,10 @@ To add the missing names directly to hosted Edge Function Secrets, save a Supaba
 personal access token as SUPABASE_ACCESS_TOKEN in the ignored root .env.local and run
 **npm run backend:placeholders**. The helper targets only WakaPoint, adds only missing
 entries, preserves existing credentials, and never prints token/secret values. The
-management token is not uploaded to the runtime. This upload remains pending until
-the token is available. Google credentials stay in Auth > Providers > Google.
+management token is not uploaded to the runtime. The hosted secret names were
+verified on 23 November 2026;
+existing values were preserved, and missing site/origin values were added.
+Google credentials stay in Auth > Providers > Google.
 
 ## Auth redirects and Google
 
@@ -57,6 +61,10 @@ http://localhost:3000/auth/callback
 http://127.0.0.1:3000/
 http://127.0.0.1:3000/auth/callback
 ~~~
+
+These hosted Auth URLs were configured and verified on 23 November 2026.
+The local **npm run backend:auth-urls** helper merges the required redirects with
+existing entries and preserves provider credentials.
 
 In [Google Cloud Console](https://console.cloud.google.com/), configure Google Auth
 Platform branding and audience, then create a **Web application** OAuth client.
@@ -142,3 +150,8 @@ before launch. Local tests cannot establish live delivery or Google consent.
 
 The available Supabase MCP cannot set Auth configuration or Edge Function secrets.
 SQL cannot substitute for those settings. See the setup worksheet above.
+
+Google troubleshooting: the authorized redirect URI is correct. HTTP 401
+invalid_client with an invalid-secret description requires replacing the provider
+Client secret value, not its Secret ID, with the value from the same Google Web
+client as the saved client ID. A Vercel rebuild does not correct provider credentials.

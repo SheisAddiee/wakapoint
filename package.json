@@ -10,7 +10,8 @@
     "lint": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
-    "backend:placeholders": "node scripts/set-supabase-placeholders.mjs"
+    "backend:placeholders": "node scripts/set-supabase-placeholders.mjs",
+    "backend:auth-urls": "node scripts/configure-supabase-auth-urls.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
