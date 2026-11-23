@@ -13,7 +13,7 @@ export default defineConfig({
     {
       command: 'npm run dev -- --host 127.0.0.1 --port 4173',
       url: 'http://127.0.0.1:4173',
-      env: { WAKAPOINT_VITE_CACHE_DIR: 'node_modules/.vite-test-blank', VITE_SUPABASE_URL: '', VITE_SUPABASE_PUBLISHABLE_KEY: '' },
+      env: { WAKAPOINT_VITE_CACHE_DIR: 'node_modules/.vite-test-blank', VITE_SUPABASE_URL: '', VITE_SUPABASE_PUBLISHABLE_KEY: '', VITE_ENABLE_PREVIEW_AUTH: 'true' },
       timeout: 180000,
     },
     {

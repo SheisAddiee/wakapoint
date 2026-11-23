@@ -12,6 +12,7 @@ export function getSupabase(config: GatewayConfig): SupabaseClient {
   if (!client) {
     client = createClient(safe.url, safe.publicKey, {
       auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+      global: { fetch: (input, init) => fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) },
     });
     clients.set(key, client);
   }
@@ -20,7 +21,7 @@ export function getSupabase(config: GatewayConfig): SupabaseClient {
 
 export async function authHeaders(config: GatewayConfig): Promise<Record<string, string>> {
   const { data, error } = await getSupabase(config).auth.getSession();
-  if (error || !data.session) throw new Error('Sign in to use the cloud workspace and official postcode service.');
+  if (error || !data.session || data.session.user.is_anonymous) throw new Error('Sign in to use the cloud workspace and official postcode service.');
   return { apikey: config.publicKey, Authorization: `Bearer ${data.session.access_token}`, 'Content-Type': 'application/json' };
 }
 

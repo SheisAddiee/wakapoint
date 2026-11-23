@@ -1,65 +1,144 @@
-# WakaPoint Supabase integration
+# WakaPoint backend
 
-Application users never enter service credentials. Configure the application once, using environment variables and server-side secrets.
+Project: **twsgnqkxruoqkqwgzjal**, eu-west-1, https://twsgnqkxruoqkqwgzjal.supabase.co.
 
-1. Create or select a Supabase project. Run [sql/schema.sql](sql/schema.sql) in its SQL editor. It creates the website address library with owner-based row-level security, an atomic save RPC, and private gateway rate-limit/cache tables.
-2. Enable **email sign-in** under Supabase Auth. The account screen uses `signInWithOtp` to create/sign in users, then `verifyOtp` to verify their email. Under **Email Templates > Magic Link**, include `{{ .Token }}`; see the template below. Configure custom SMTP for reliable delivery to your users. The workspace requires a non-anonymous account; there is no demo bypass or local library fallback.
-3. Copy the project URL and **publishable** key into the application's `.env.local`, using the names in the root `.env.example`. Never put a NIPOST key or service-role key in a `VITE_` variable. Restart Vite after changing configuration.
-4. Deploy `functions/wakapoint-gateway/index.ts` as `wakapoint-gateway`. Keep JWT verification enabled. The function additionally verifies the token through Supabase Auth; a publishable key by itself cannot authorize a request.
-5. In Edge Function secrets, set `NIPOST_API_KEY` and `WAKAPOINT_ALLOWED_ORIGINS`. Origins must exactly match the preview/production origin, including protocol and port. See [.env.example](.env.example). Supabase supplies its own server environment values.
-6. Open the Postcode bridge and verify `FC-01-A01-KP-27` with a test key. A test key uses NIPOST's curated public sandbox, not the live database. Level 1 verifies existence; level 3 requires appropriate upstream access and consumes credits with a live key.
+## Deployed on 22 November 2026
 
-## Keys and configuration
+- Private saved-address library and atomic save RPC, with owner/non-anonymous RLS.
+- Durable account notifications, welcome/address-save triggers, read-only content
+  grants, paginated history, unread counts and persistent read status. Notification
+  text contains no addresses. Existing record upserts do not duplicate notifications.
+- Private postcode rate-limit/cache tables and **wakapoint-gateway** (JWT verified).
+- **wakapoint-auth-email**, an Auth webhook using Standard Webhooks signatures.
+- Restricted execution of the platform's public rls_auto_enable event trigger.
 
-| Value | Where to obtain it | Where to configure it | Purpose |
-| --- | --- | --- | --- |
-| `VITE_SUPABASE_URL` | Supabase project settings, API | Root `.env.local` / frontend hosting environment | Auth, private library and gateway URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase project settings, API keys; starts with `sb_publishable_` | Root `.env.local` / frontend hosting environment | Public browser access; RLS still protects records |
-| `NIPOST_API_KEY` | NIPOST developer account; `nipost_test_` or `nipost_live_` | Supabase Edge Function secrets | Official search and postcode validation |
-| `WAKAPOINT_ALLOWED_ORIGINS` | Your app's development/production origins | Supabase Edge Function secrets | Gateway origin allowlist |
-| Google OAuth client ID and secret | Google Cloud > Google Auth Platform > Clients, Web application | Supabase Auth > Providers > Google | Google signup/sign-in |
-| SMTP host, port, username, password/API credential and sender email | Your email delivery provider | Supabase Auth > Email > SMTP settings | Deliver verification codes to real users |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Supplied automatically to hosted Edge Functions | Server runtime only | Auth verification, private cache and rate-limit RPCs |
+Remote rolled-back fixture tests passed: ownership, cross-account isolation,
+invalid-payload/foreign-ID rollback, notification deduplication/read permissions,
+anonymous rejection and private-RPC denial. No fixture accounts remain; no emails
+were sent. Local handler tests use synthetic credentials and mock providers.
 
-No service-role key is needed in the frontend. No map, Gemini/OpenAI or payment API key is used. The OTP template, database SQL, provider enablement and redirect URLs are also required; keys alone do not activate every service.
+Google is enabled in the live project; real consent/callback testing is pending.
+Resend and NIPOST still require activation below. The connected Vercel account does not expose
+the WakaPoint hosting project; its owner must set public build variables.
 
-## Email-code template
+## Environment setup worksheet
 
-Use this under **Auth > Email Templates > Magic Link**. The default template sends a clickable link instead of the code the UI requests.
+The ignored root **.env.local** contains the working public Supabase URL/key.
+The ignored **supabase/.env.local** contains clearly marked REPLACE_ME placeholders
+for Resend, NIPOST, the email hook and Google. Replace those locally when available.
+Private credentials must never have a VITE_ prefix or enter Git.
 
-```html
-<h2>Your WakaPoint sign-in code</h2>
-<p>Enter this code in WakaPoint to continue:</p>
-<p style="font-size:24px;letter-spacing:4px"><strong>{{ .Token }}</strong></p>
-<p>If you did not request this email, you can ignore it.</p>
-```
+In WakaPoint's Vercel Production environment, copy VITE_SUPABASE_URL and
+VITE_SUPABASE_PUBLISHABLE_KEY from the root .env.local, and set
+VITE_ENABLE_PREVIEW_AUTH=false. Rebuild after editing. Never use a secret/service-role
+key as the publishable key. Unconfigured random-email entry is development-only.
 
-The frontend supports 6–8 digit codes; use an OTP length in that range in Supabase's email settings. Resend follows the default 60-second cooldown. Configure email sender/rate limits according to your provider and account's settings.
+Google values in the worksheet must be entered in Supabase Auth > Providers > Google;
+putting them in a local file alone does not enable the provider. Supabase provides
+SUPABASE_URL and its server secret/service-role environment automatically.
 
-## Google and redirect setup
+To add the missing names directly to hosted Edge Function Secrets, save a Supabase
+personal access token as SUPABASE_ACCESS_TOKEN in the ignored root .env.local and run
+**npm run backend:placeholders**. The helper targets only WakaPoint, adds only missing
+entries, preserves existing credentials, and never prints token/secret values. The
+management token is not uploaded to the runtime. This upload remains pending until
+the token is available. Google credentials stay in Auth > Providers > Google.
 
-1. Create a Google **Web application** OAuth client. Configure consent screen/audience and the standard `openid`, email and profile scopes.
-2. Set Google **Authorized redirect URI** to `https://YOUR_PROJECT.supabase.co/auth/v1/callback` (copy the exact value from Supabase's Google provider page). Set authorized JavaScript origins to your app origin.
-3. Add the client ID and secret in **Supabase Auth > Providers > Google** and enable it.
-4. Set **Auth > URL Configuration > Site URL** to your deployed app. Add exact root callback URLs to the redirect allowlist: `http://localhost:3000/`, `http://127.0.0.1:3000/` for local previews and `https://YOUR_APP_DOMAIN/` for production.
-5. The SDK uses PKCE, exchanges the returned `?code=...` automatically and restores the session. The frontend removes callback parameters from the URL. A denied/failed callback returns an actionable account error.
+## Auth redirects and Google
 
-Onboarding role/city/first-task preferences are stored under `user_metadata.wakapoint`. These values are interface preferences only; they never grant permissions. Signed-in saved addresses are owned by `auth.uid()` and can be reopened on another signed-in device. Signing out clears this browser's Auth session without deleting cloud records.
+In [Auth URL Configuration](https://supabase.com/dashboard/project/twsgnqkxruoqkqwgzjal/auth/url-configuration), set Site URL to **https://wakapoint.vercel.app/**.
+Allow these exact URLs:
 
-The gateway exposes `POST` actions `lookup`, `search` and `health`. It accepts a verified Supabase user JWT, validates inputs, enforces database-backed per-user and hashed-IP rate limits, filters upstream output to address fields, and caches valid lookups for one hour. It never logs request bodies or upstream secrets, or returns owner/occupant fields. Cache keys include a hash of the upstream key to isolate test/live datasets and key rotations. Error responses are fixed messages rather than upstream payloads.
+~~~text
+https://wakapoint.vercel.app/
+https://wakapoint.vercel.app/auth/callback
+http://localhost:3000/
+http://localhost:3000/auth/callback
+http://127.0.0.1:3000/
+http://127.0.0.1:3000/auth/callback
+~~~
 
-The `search` action follows NIPOST's segment-aware autocomplete contract. Suggestions may be partial prefixes, not complete postcodes. They are composed only from the entered prefix and official segment suggestions; no postcode is invented from a narrative address.
+In [Google Cloud Console](https://console.cloud.google.com/), configure Google Auth
+Platform branding and audience, then create a **Web application** OAuth client.
+Authorized JavaScript origins: https://wakapoint.vercel.app and http://localhost:3000.
+Authorized redirect URI:
 
-Data retention: rate counters expire after two minutes on subsequent requests; cached postcode payloads expire after one hour and are pruned on subsequent writes. Saved addresses persist until their authenticated owner deletes them. Auth account lifecycle/retention must be configured by the operator. The frontend filters contact patterns before persistence; review remains necessary. These controls do not establish legal compliance.
+~~~text
+https://twsgnqkxruoqkqwgzjal.supabase.co/auth/v1/callback
+~~~
 
-This folder is deployable integration code, not a provisioned Supabase project. No SQL or function has been applied to a live account as part of this local delivery.
+Enable Google in [Supabase Auth Providers](https://supabase.com/dashboard/project/twsgnqkxruoqkqwgzjal/auth/providers)
+and save the client ID/secret. Add Google test users while the audience is in Testing;
+publish for general availability. The frontend checks provider settings and keeps
+unavailable Google entry disabled. Gmail addresses can use email codes without OAuth.
 
-## Hosted verification after setup
+Auth is passwordless: email OTP/link or Google, so password reset is not part of the
+sign-in flow. The SDK exchanges Google PKCE codes. Email token-hash links support a
+second browser/device; the app verifies them through Auth and strips credentials
+from browser history. Persisted sessions are checked with auth.getUser() before
+opening the workspace. Failed/expired callbacks keep private routes protected.
+vercel.json serves /signup, /signin, /login, /dashboard and /auth/callback through the SPA.
 
-- Request an email code, verify it, finish onboarding, reload and sign out/sign in again.
-- Sign in with Google and check the deployed callback.
-- Save an address; confirm another account cannot read or update it through the Data API.
-- Verify the official sandbox postcode through the deployed gateway, confirm the recipient match and export it.
-- Check allowed/disallowed origins, invalid tokens, upstream key errors and rate-limit responses.
+## Activate Resend emails
 
-Local browser tests mock Auth and upstream data; they do not prove email delivery, Google consent or deployed RLS. For a public launch, finish your privacy/account lifecycle policy and configure Supabase's Auth rate/abuse controls.
+1. Verify a domain you control in [Resend](https://resend.com/domains), adding its DNS
+   records. The vercel.app application subdomain is not your owned sending domain.
+2. Create a sending API key, preferably restricted to that verified domain.
+3. Replace RESEND_API_KEY and WAKAPOINT_EMAIL_FROM in supabase/.env.local. Use a real
+   sender on the verified domain. Save both in [Edge Function Secrets](https://supabase.com/dashboard/project/twsgnqkxruoqkqwgzjal/functions/secrets).
+4. Prepare a **Send Email** HTTPS hook in [Auth Hooks](https://supabase.com/dashboard/project/twsgnqkxruoqkqwgzjal/auth/hooks) with this URL:
+
+   ~~~text
+   https://twsgnqkxruoqkqwgzjal.supabase.co/functions/v1/wakapoint-auth-email
+   ~~~
+
+5. Generate its secret and save SEND_EMAIL_HOOK_SECRET in Edge Function Secrets,
+   preserving the v1,whsec_ prefix. Enable/save the hook only after all three real
+   values are present. Keep Email enabled. An enabled hook replaces SMTP.
+6. Set a 6–8 digit OTP and appropriate expiry/rate limits in Auth. The frontend uses
+   a 60-second resend cooldown; hosted limits remain authoritative.
+7. Test signup delivery to your own account, code entry, links on a second browser,
+   resend/expiry, reload, sign-out/re-entry and Resend delivery status before launch.
+
+The hook intentionally uses verify_jwt=false because webhook signatures authenticate
+it. It rejects unsigned/tampered/stale/future requests, anonymous users, malformed
+payloads and unsafe redirects. Resend idempotency keys remain stable for retries.
+Provider errors are redacted; no generic public email endpoint exists. Templates
+cover signup/sign-in, invitations, recovery verification, reauthentication, secure
+email changes and Auth security notices. Secure email-change hashes are mapped to
+the correct current/new recipients. Payloads, codes and keys are not logged.
+
+Until activation, Supabase's default mailer applies with delivery restrictions.
+The UI accepts a link or a code. If retaining default SMTP, include both
+{{ .Token }} and {{ .ConfirmationURL }} in the Magic Link template.
+Real Resend delivery is unverified until domain, secrets and hook setup are complete.
+
+## NIPOST and database reproduction
+
+Replace NIPOST_API_KEY with a real test/live key and set it in Edge Function Secrets.
+Dummy keys are not service activation. Default allowed origins are the production
+site and local port 3000; WAKAPOINT_ALLOWED_ORIGINS overrides the exact list.
+The gateway validates Auth users, rate-limits private counters, allowlists output
+and caches only filtered valid postcode responses. Modern server secret keys use
+apikey, not a secret-key Bearer header; legacy service-role JWTs remain supported.
+NIPOST sandbox/live verification remains pending a real key and entitlement.
+
+For another project apply sql/schema.sql, sql/notifications.sql, sql/security.sql
+(if its public.rls_auto_enable function exists), and sql/rls-performance.sql in order.
+The notifications creation snapshot runs once; use migrations for subsequent changes.
+Hosted changes are recorded in Supabase migration history. Deploy both function
+folders with deno.json and their relative dependencies.
+sql/smoke-test.sql uses transient fixtures and rolls back on success.
+
+## Operating limits
+
+Libraries hold 100 addresses and save atomically using replacement semantics;
+concurrent stale tabs can overwrite newer library content. Notifications persist
+with the account, support paginated reads and refresh unread counts on focus,
+visibility, each minute while visible, and library changes. Private cache/rate tables
+intentionally have RLS without browser policies. Expired cache/counters are pruned
+on later requests. Review account deletion, retention, privacy and Auth abuse controls
+before launch. Local tests cannot establish live delivery or Google consent.
+
+The available Supabase MCP cannot set Auth configuration or Edge Function secrets.
+SQL cannot substitute for those settings. See the setup worksheet above.

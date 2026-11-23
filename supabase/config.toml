@@ -2,3 +2,7 @@ project_id = "wakapoint"
 
 [functions.wakapoint-gateway]
 verify_jwt = true
+
+# Supabase Auth authenticates this webhook with Standard Webhooks signatures.
+[functions.wakapoint-auth-email]
+verify_jwt = false

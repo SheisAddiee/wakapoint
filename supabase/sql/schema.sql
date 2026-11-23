@@ -9,7 +9,7 @@ create table if not exists public.saved_addresses (
   result jsonb not null,
   point jsonb,
   postcode text,
-  constraint saved_address_input check (jsonb_typeof(result -> 'input') = 'string' and char_length(result ->> 'input') between 1 and 2000),
+  constraint saved_address_input check (jsonb_typeof(result) = 'object' and result ? 'input' and jsonb_typeof(result -> 'input') = 'string' and char_length(result ->> 'input') between 1 and 2000),
   constraint saved_address_postcode check (postcode is null or postcode ~ '^[A-Z]{2}-(0[1-9]|[1-9][0-9])-[A-Z][A-Z0-9]{2}-[A-Z]{2}-(0[1-9]|[1-9][0-9])$')
 );
 create index if not exists saved_addresses_user_time_idx on public.saved_addresses(user_id, saved_at desc);
@@ -20,24 +20,27 @@ drop policy if exists saved_addresses_select on public.saved_addresses;
 drop policy if exists saved_addresses_insert on public.saved_addresses;
 drop policy if exists saved_addresses_update on public.saved_addresses;
 drop policy if exists saved_addresses_delete on public.saved_addresses;
-create policy saved_addresses_select on public.saved_addresses for select to authenticated using ((select auth.uid()) = user_id);
-create policy saved_addresses_insert on public.saved_addresses for insert to authenticated with check ((select auth.uid()) = user_id);
-create policy saved_addresses_update on public.saved_addresses for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy saved_addresses_delete on public.saved_addresses for delete to authenticated using ((select auth.uid()) = user_id);
+create policy saved_addresses_select on public.saved_addresses for select to authenticated using ((select auth.uid()) = user_id and coalesce((select auth.jwt()) ->> 'is_anonymous','false') = 'false');
+create policy saved_addresses_insert on public.saved_addresses for insert to authenticated with check ((select auth.uid()) = user_id and coalesce((select auth.jwt()) ->> 'is_anonymous','false') = 'false');
+create policy saved_addresses_update on public.saved_addresses for update to authenticated using ((select auth.uid()) = user_id and coalesce((select auth.jwt()) ->> 'is_anonymous','false') = 'false') with check ((select auth.uid()) = user_id and coalesce((select auth.jwt()) ->> 'is_anonymous','false') = 'false');
+create policy saved_addresses_delete on public.saved_addresses for delete to authenticated using ((select auth.uid()) = user_id and coalesce((select auth.jwt()) ->> 'is_anonymous','false') = 'false');
 
 -- Atomically persist this authenticated account's library. RLS applies to every operation.
 create or replace function public.save_wakapoint_library(p_records jsonb)
 returns void language plpgsql security invoker set search_path = '' as $$
-declare owner_id uuid := auth.uid();
+declare owner_id uuid := auth.uid(); saved_count integer;
 begin
-  if owner_id is null then raise exception 'Authentication required'; end if;
-  if jsonb_typeof(p_records) <> 'array' or jsonb_array_length(p_records) > 100 then raise exception 'Library limit is 100 addresses'; end if;
+  if owner_id is null or coalesce(auth.jwt() ->> 'is_anonymous','false') <> 'false' then raise exception 'Authentication required'; end if;
+  if p_records is null or jsonb_typeof(p_records) is distinct from 'array' then raise exception 'Send an address array'; end if;
+  if jsonb_array_length(p_records) > 100 then raise exception 'Library limit is 100 addresses'; end if;
   delete from public.saved_addresses where user_id = owner_id and id not in (select (item ->> 'id')::uuid from jsonb_array_elements(p_records) as item);
   insert into public.saved_addresses(id, user_id, saved_at, result, point, postcode)
   select (item ->> 'id')::uuid, owner_id, (item ->> 'savedAt')::timestamptz, item -> 'result', nullif(item -> 'point', 'null'::jsonb), item ->> 'postcode'
   from jsonb_array_elements(p_records) as item
   on conflict(id) do update set saved_at = excluded.saved_at, result = excluded.result, point = excluded.point, postcode = excluded.postcode
   where public.saved_addresses.user_id = owner_id;
+  get diagnostics saved_count = row_count;
+  if saved_count <> jsonb_array_length(p_records) then raise exception 'An address could not be saved'; end if;
 end;
 $$;
 revoke all on function public.save_wakapoint_library(jsonb) from public, anon;
@@ -54,6 +57,7 @@ create table if not exists wakapoint_private.rate_limits (
   primary key(bucket, window_start)
 );
 alter table wakapoint_private.rate_limits enable row level security;
+create index if not exists rate_limits_window_idx on wakapoint_private.rate_limits(window_start);
 grant select, insert, update, delete on wakapoint_private.rate_limits to service_role;
 create table if not exists wakapoint_private.postcode_cache (
   cache_key text primary key,
@@ -61,6 +65,7 @@ create table if not exists wakapoint_private.postcode_cache (
   expires_at timestamptz not null
 );
 alter table wakapoint_private.postcode_cache enable row level security;
+create index if not exists postcode_cache_expiry_idx on wakapoint_private.postcode_cache(expires_at);
 grant select, insert, update, delete on wakapoint_private.postcode_cache to service_role;
 
 create or replace function public.wakapoint_consume_limit(p_bucket text, p_limit integer default 30)

@@ -1,41 +1,58 @@
 # WakaPoint implementation status
 
-Updated 18 November 2026. The continuation completes the account/onboarding work, extended landing page, supplied responsive wallpapers, session loading and local verification.
+Updated 23 November 2026. Production auth, notifications and server email integration
+were implemented while preserving the supplied wallpapers, editorial landing imagery,
+shared React Bits components, original animation timing and readable wavy theme reveal.
 
-| Work | Status | Evidence / next check |
+| Work | Current status | Evidence / remaining setup |
 | --- | --- | --- |
-| Monochrome dispatch workspace and supporting views | Implemented | Existing local preview and domain checks |
-| `.gitignore`, starter cleanup and session exclusion | Verified | Session notes and preview artifacts are ignored; source wallpapers are included |
-| Privacy metadata restoration and point field allowlist | Implemented | Regression unit test |
-| Stale postcode cancellation and authenticated examples | Implemented | Browser tests and gateway handler checks |
-| Mobile email/Google account entry | Locally verified | Email success/error, Google PKCE/denied callback and protected-route browser journeys |
-| Role/city/task onboarding and account isolation | Locally verified | Persistence/back/retry/sign-out, empty workspace and tutorial completion/skipping |
-| Extended landing, features, roles, privacy and FAQs | Verified | Functional account entry, section navigation and accessible FAQ controls |
-| Desktop/tablet and phone wallpapers across hero/navbar | Verified | Six viewport/device configurations in both themes; images decode and no horizontal overflow |
-| Session loading and motion preferences | Implemented / locally verified | Loader connected to auth initialization; keyboard and reduced-motion browser checks |
-| Submission README and product/architecture docs | Reconciled | Removed stale demo/fallback claims and documented current behavior |
-| TypeScript, unit tests and production build | Passed | TypeScript, 18 unit tests and Vite build; both wallpapers emitted to dist/assets |
-| Desktop/mobile browser journeys | Passed across suite and targeted rerun | 19/20 initial pass; initial navigation timeout passed on targeted rerun; services mocked |
-| Hosted Supabase Auth/SQL/function and live NIPOST | Operator setup needed | Credentials/project are outside local delivery |
-| Physical-phone behaviour | Unverified | Browser emulation is not hardware testing |
+| Landing, signup and six workspace tools | Implemented | Existing preview journeys and responsive checks |
+| Theme pill, original motion timing and content-visible wavy transition | Preserved | Previous screenshot and keyboard/reduced-motion checks |
+| Landing screenshots, NIPOST diagram, DM Sans/Newsreader | Committed previously | Local assets and font licenses |
+| Production Auth boundary | Implemented | Non-anonymous sessions, restored-user verification, safe callback cleanup |
+| Email OTP and cross-device token-hash links | Implemented / mock-browser verified | Real email delivery still requires provider activation |
+| Google OAuth | Enabled in live Supabase | Live mobile button enabled, no overflow/page errors; real consent test pending |
+| Private address library and gateway storage | Deployed | Owner isolation, invalid/foreign-ID rollback and anonymous-denial SQL tests passed |
+| Notification inbox | Deployed / implemented | Welcome/save triggers, content grants, history/read state, retries and navigation |
+| NIPOST gateway | Deployed | JWT + Auth user checks, rate limits, output allowlist/cache; real key pending |
+| Resend Auth email hook | Deployed | Signed/timestamped webhooks, safe redirects, correct email-change hashes, idempotency |
+| Credential worksheet and hosted-placeholder helper | Prepared | Ignored server env with REPLACE_ME values; hosted upload needs management token |
+| Vercel account paths and response headers | Implemented | Signup/login/dashboard/callback rewrites; public build variables set by hosting owner |
+| Database advisors | No warnings | Intentional private-table RLS and new unused indexes are informational |
+| Verification | See verification record below | Local mocks do not prove live delivery or Google consent |
 
-Verification on 18 November 2026:
+## Verification record
 
-- `npm run lint`: passed after the final source changes.
-- `npm test`: all 18 domain/gateway tests passed.
-- `npm run build`: passed after the final source changes. Vite reports an 881 kB entry chunk; future splitting can reduce initial script delivery.
-- `npm run test:e2e`: 19 browser journeys passed; the first page navigation timed out during startup. `npm run test:e2e -- --grep 'landing leads'` then passed that journey. Hosted Auth, storage and NIPOST responses are mocked in this suite.
-- Local browser check: desktop 1440x1000, tablet 768x1024/1024x768, phone 390x844/844x390 and small phone 320x568, each in light/dark mode. Correct wallpaper, decoded image, no overflow, transparent hero navbar, solid navbar after scrolling, keyboard section links, FAQ controls, reduced motion and protected account entry passed with no page errors. Screenshots remain in ignored `.preview/`.
-- Live preview: started on `http://localhost:3000` and opened in the default browser.
+- 32 unit tests passed: extraction, redaction, previews, gateway auth/rate limits,
+  email signatures/timestamps, secure email changes, redirect validation and dummy-key rejection.
+- TypeScript passed after the implementation. Final UI error-message change is being rechecked.
+- Production build passed at 897 kB JS (existing chunk-size warning). Final build verification follows.
+- Remote SQL smoke tests passed in a rolled-back transaction. No fixture users remain;
+  no test emails were sent. RLS performance and public function grants were checked.
+- 10 account/browser journeys passed in the first continuation run. Subsequent
+  notification read-state/navigation check passed after the response-header mock fix.
+  The combined account-entry test exceeded its cold-server timeout; it was split by
+  flow. The notification error message race was fixed. Final affected-test run is pending.
+- Live Supabase settings report Email and Google enabled. Mobile signup screenshot
+  shows enabled Google entry, no horizontal overflow and no JavaScript page errors.
+- Local preview returned HTTP 200 on port 3000. Automatic browser opening was blocked
+  by execution policy; the preview link is available.
 
-Git workflow: stage and commit each verified major change locally. The user will push; notify them with “push” when a milestone is ready. Do not push automatically. The landing implementation and wallpaper already exist in commits `51c8157` and `b673516`.
+## Remaining activation
 
-Hosted setup remains with the operator: set the public Supabase URL/publishable key, enable email/Google and SMTP, apply the SQL, deploy the gateway and set its NIPOST key/origin secrets using `supabase/README.md`. Physical-phone and live-provider behavior are not established by local browser emulation.
+1. Paste SUPABASE_ACCESS_TOKEN into ignored root .env.local so the authorized helper
+   can add missing hosted placeholders. It must not go in Vercel or runtime secrets.
+2. Replace Resend sender/key/hook placeholders in hosted Edge Function Secrets,
+   verify the sending domain, enable the Auth hook and test real delivery.
+3. Set a real NIPOST key and verify permitted sandbox/live calls.
+4. Configure public VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY in Vercel and
+   rebuild. The connected Vercel account does not expose WakaPoint.
+5. Verify real Google consent/callback, device behaviour, account deletion/retention
+   and Auth abuse settings before launch. Full-library saves retain stale-tab
+   replacement semantics; team collaboration/conflict resolution is not implemented.
 
-## React Bits continuation — 22 November 2026
+Follow ../supabase/README.md for exact project URLs and setup. API activation is
+distinct from deployed code; Google/Resend secrets are never fabricated as working.
 
-Added adapted BlurText, SpotlightCard, CircularText and SpecularButton to the public landing, with SpecularButton also used for email and verification submits. The navbar now has a Sign up action. Hero ornament and an airplane theme reveal retain the supplied wallpapers and monochrome identity. No new package was added. The headline and section entrances were shortened, and the theme sweep was reduced from 850ms to 450ms in response to the user's feedback about sluggish motion.
-
-The Supabase connector returned `USER_NOT_LOGGED_IN`; the user will reconnect later and directed work back to React Bits. No hosted SQL, API keys or Auth configuration have been changed. The intended deployment domain is `https://wakapoint.vercel.app` for the subsequent backend/redirect setup.
-
-Latest steering: restore the original component timing and keep content visible during the wave. The theme pill now appears across screens, and an 850ms wavy snapshot reveal replaces the rejected solid veil. Shared React Bits action buttons and panels apply throughout the workspace. Temporary sign-in accepts any valid email only when both Supabase values are blank and preview auth is enabled; profiles and reviewed libraries are local and account-scoped. Configuring Supabase disables this fallback. The local browser journey passed preview sign-in, onboarding, saving, all six workspace views, theme persistence, rapid toggling, mobile layout, re-entry and reduced-motion keyboard handling without page errors. Final wavy-reveal verification follows the last visual correction.
+Git workflow: add and commit locally, then say **push**. The user pushes manually.
+Do not automatically push. Earlier verified milestones: b86931d, 474577d, ef67dd4.

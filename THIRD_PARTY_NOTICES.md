@@ -40,3 +40,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Fonts
+
+The landing page uses locally hosted DM Sans and Newsreader, distributed under
+the SIL Open Font License 1.1. Their copyright notices and full licenses are in
+[public/fonts/DM-Sans-OFL.txt](public/fonts/DM-Sans-OFL.txt) and
+[public/fonts/Newsreader-OFL.txt](public/fonts/Newsreader-OFL.txt).
+
+## Standard Webhooks
+
+The server-only Auth email function uses Standard Webhooks 1.0.0 to validate
+webhook signatures and timestamps. It is MIT licensed; see the package's
+[license](https://github.com/standard-webhooks/standard-webhooks/blob/main/libraries/javascript/LICENSE).

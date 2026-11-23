@@ -37,7 +37,7 @@ export function filterSuggestions(raw: unknown, query: string) {
 export function createGateway(deps: GatewayDependencies) {
   return async (request: Request): Promise<Response> => {
     const origin = request.headers.get('Origin') || '';
-    const origins = (deps.env('WAKAPOINT_ALLOWED_ORIGINS') || '').split(',').map(v => v.trim()).filter(Boolean);
+    const origins = (deps.env('WAKAPOINT_ALLOWED_ORIGINS') || 'https://wakapoint.vercel.app,http://localhost:3000,http://127.0.0.1:3000').split(',').map(v => v.trim()).filter(Boolean);
     const cors: Record<string,string> = { 'Vary': 'Origin', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
     if (origins.includes(origin)) cors['Access-Control-Allow-Origin'] = origin;
     const reply = (data: unknown, status = 200, headers: Record<string,string> = {}) => new Response(JSON.stringify(data), { status, headers: { ...cors, ...headers, 'Content-Type':'application/json', 'Cache-Control':'no-store' } });
@@ -46,9 +46,11 @@ export function createGateway(deps: GatewayDependencies) {
     if (request.method !== 'POST') return reply({ error:{ code:'method_not_allowed',message:'Use POST.' } },405);
     const token = request.headers.get('Authorization') || '';
     if (!/^Bearer [A-Za-z0-9._-]{20,}$/.test(token)) return reply({ error:{ code:'unauthorized',message:'An authenticated workspace session is required.' } },401);
-    const supabaseUrl = deps.env('SUPABASE_URL'), serviceKey = deps.env('SUPABASE_SERVICE_ROLE_KEY');
+    let modernKey: string | undefined;
+    try { const keys = JSON.parse(deps.env('SUPABASE_SECRET_KEYS') || '{}'); modernKey = Object.values(keys).find((key): key is string => typeof key === 'string' && key.startsWith('sb_secret_')); } catch { /* Legacy projects supply a service-role JWT. */ }
+    const supabaseUrl = deps.env('SUPABASE_URL'), serviceKey = modernKey || deps.env('SUPABASE_SERVICE_ROLE_KEY');
     if (!supabaseUrl || !serviceKey) return reply({ error:{ code:'configuration_missing',message:'The address service is unavailable.' } },503);
-    const dbHeaders = { apikey:serviceKey, Authorization:`Bearer ${serviceKey}`, 'Content-Type':'application/json' };
+    const dbHeaders = { apikey:serviceKey, ...(!serviceKey.startsWith('sb_secret_') ? { Authorization:`Bearer ${serviceKey}` } : {}), 'Content-Type':'application/json' };
     const rpc = async (name: string, body: unknown) => {
       const response = await deps.fetch(`${supabaseUrl}/rest/v1/rpc/${name}`,{ method:'POST',headers:dbHeaders,body:JSON.stringify(body),signal:AbortSignal.timeout(6000) });
       if (!response.ok) throw new Error('Gateway database unavailable');
@@ -58,7 +60,7 @@ export function createGateway(deps: GatewayDependencies) {
       const auth = await deps.fetch(`${supabaseUrl}/auth/v1/user`,{ headers:{ apikey:serviceKey,Authorization:token },signal:AbortSignal.timeout(6000) });
       if (!auth.ok) return reply({ error:{ code:'unauthorized',message:'Your workspace session expired. Reload and retry.' } },401);
       const user = await auth.json();
-      if (typeof user.id !== 'string') return reply({ error:{ code:'unauthorized',message:'An authenticated session is required.' } },401);
+      if (typeof user.id !== 'string' || user.is_anonymous === true) return reply({ error:{ code:'unauthorized',message:'An authenticated account is required.' } },401);
       const ip = (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim();
       const digest = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${serviceKey}:${ip}`));
       const ipHash = Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2,'0')).join('');
@@ -70,8 +72,9 @@ export function createGateway(deps: GatewayDependencies) {
       let body: unknown; try { body = JSON.parse(text); } catch { return reply({ error:{ code:'invalid_json',message:'Send valid JSON.' } },400); }
       if (!isObject(body)) return reply({ error:{ code:'invalid_input',message:'Send a request object.' } },400);
       const nipostKey = deps.env('NIPOST_API_KEY');
-      if (body.action === 'health') return reply({ data:{ configured:!!nipostKey,service:'wakapoint-gateway' } });
-      if (!nipostKey || !/^nipost_(?:test|live)_/.test(nipostKey)) return reply({ error:{ code:'upstream_not_configured',message:'Official postcode verification is awaiting service activation.' } },503);
+      const nipostConfigured = !!nipostKey && /^nipost_(?:test|live)_/.test(nipostKey) && !/REPLACE|DUMMY/i.test(nipostKey);
+      if (body.action === 'health') return reply({ data:{ configured:nipostConfigured,service:'wakapoint-gateway' } });
+      if (!nipostKey || !nipostConfigured) return reply({ error:{ code:'upstream_not_configured',message:'Official postcode verification is awaiting service activation.' } },503);
       let path: string, cacheKey: string | null = null, code = '';
       if (body.action === 'lookup') {
         code = canonicalPostcode(body.code) || '';

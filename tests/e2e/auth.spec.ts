@@ -10,7 +10,7 @@ async function emailSignIn(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Verify email' }).click();
 }
 
-test('landing leads to mobile preview signup and protects configured private routes', async ({ page }) => {
+test('landing leads to mobile preview signup', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Local directions. A clearer way forward.' })).toBeVisible();
@@ -28,6 +28,10 @@ test('landing leads to mobile preview signup and protects configured private rou
   await expect(page.getByRole('heading', { name: /A workspace that/ })).toBeVisible();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Get started with WakaPoint' })).toBeVisible();
+});
+
+test('configured private routes require account sign-in', async ({ page }) => {
+  await mockServices(page);
   await page.goto(origin + '/#saved', { waitUntil: 'domcontentloaded' });
   await expect(page.getByLabel('Email address')).toBeVisible();
   await expect(page.getByLabel('Where are we delivering?')).toHaveCount(0);
@@ -110,6 +114,7 @@ test('failed onboarding preserves choices and offers a retry', async ({ page }) 
 });
 
 test('Google uses PKCE and a denied callback produces a recoverable error', async ({ page }) => {
+  await mockServices(page);
   let authorizationUrl = '';
   await page.route('https://wakapoint-test.supabase.co/auth/v1/authorize**', async route => {
     authorizationUrl = route.request().url();

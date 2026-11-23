@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The public landing page leads to signup or sign-in. When Supabase is not configured, any valid email opens a temporary preview account on this device; the Google button opens a preview profile. Real email-code/Google authentication takes over when Supabase is configured. Set VITE_ENABLE_PREVIEW_AUTH=false to disable preview entry.
+Open http://localhost:3000. The public landing page leads to signup or sign-in. When Supabase is not configured, any valid email opens a temporary preview account on this device; the Google button opens a preview profile. Real email-code/Google authentication takes over when Supabase is configured. Preview entry is development-only; production requires real Supabase auth. Set VITE_ENABLE_PREVIEW_AUTH=false to disable local preview entry.
 
 ## What works
 
@@ -22,6 +22,7 @@ Open http://localhost:3000. The public landing page leads to signup or sign-in. 
 - Interactive map with approximate locality centres, reviewed delivery pins and a connection message when street tiles are unavailable.
 - Batch processing of up to 100 addresses, filters, pagination, reviewed CSV/JSON exports and spreadsheet formula protection.
 - Saved-address search, deletion and undo; authenticated accounts use a private Supabase library.
+- Account-owned notifications with unread counts, read persistence, history, retry and links to workspace pages.
 - Postcode format checks, authenticated official search/lookup, recipient-match confirmation and linking a verified code to dispatch output.
 - A reusable React checkout field, integration examples and a contact-redaction playground.
 
@@ -33,7 +34,7 @@ Copy the root [.env.example](.env.example) to `.env.local` and set the Supabase 
 
 Follow [supabase/README.md](supabase/README.md) to enable email codes and Google, configure redirect URLs, apply [supabase/sql/schema.sql](supabase/sql/schema.sql), and deploy the gateway with its server-side NIPOST secret. Configure the email template to send `{{ .Token }}` for code entry. Google client secrets and NIPOST keys belong in provider settings and Edge Function secrets, never in `VITE_` variables.
 
-The repository contains integration code and SQL. It does not provision a hosted project or install live credentials. Real email delivery, Google consent, cloud row-level security and live NIPOST calls require operator configuration and hosted verification.
+The WakaPoint database and both Edge Functions were deployed on 22 November 2026. Owner isolation and rollback were tested remotely. Google OAuth, Resend delivery, NIPOST credentials and Vercel public build configuration still require activation; see supabase/README.md. The local public Supabase configuration is working, while missing private credentials have REPLACE_ME placeholders in the ignored supabase/.env.local worksheet.
 
 ## Checks and deployment
 

@@ -1,0 +1,4 @@
+{
+  "imports": { "standardwebhooks": "npm:standardwebhooks@1.0.0" },
+  "compilerOptions": { "lib": ["deno.ns", "dom", "esnext"], "strict": true }
+}

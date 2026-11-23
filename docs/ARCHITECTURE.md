@@ -1,23 +1,58 @@
 # WakaPoint architecture
 
-React 19 and TypeScript run in a Vite static frontend. `App.tsx` owns public landing routes and the authenticated account boundary; `WorkspaceApp.tsx` owns hash-routed dispatch tools. Domain extraction, persistence normalization and export utilities are separate from components.
+React 19/TypeScript run in a Vite static frontend. App owns the public/account
+boundary; WorkspaceApp owns hash-routed dispatch tools. Domain extraction,
+persistence normalization and exports remain separate from components.
 
-## Data flow
+## Account and data flow
 
-Email/Google → Supabase Auth SDK session → validated onboarding metadata → workspace → local redaction/extraction → map review → optional authenticated Edge Function → filtered NIPOST response → reviewed export/library.
+Email code/link or Google PKCE → Supabase Auth → server-checked session → allowlisted
+onboarding metadata → local redaction/extraction → map review → optional authenticated
+NIPOST gateway → reviewed export/private library.
 
-`src/lib/supabase.ts` creates one SDK client per public configuration. Auth, REST storage and gateway calls use the same persisted/refreshable session. Google uses PKCE and returns to the root application URL; email uses OTP verification. The SDK handles code exchange and session changes. Raw callbacks/errors and credentials are not displayed in the product.
+One SDK client per public configuration shares session refresh across Auth, storage,
+notifications and gateway calls. Restored users are checked through auth.getUser()
+before opening the private workspace. Anonymous accounts are rejected in the UI,
+RLS and gateway. Email token-hash callbacks support another device; Google uses PKCE.
+Callback credentials/errors are removed from history. Account aliases preserve intent.
 
 ## Storage and authorization
 
-`public.saved_addresses` is keyed by record UUID and authenticated owner UUID. Select/insert/update/delete RLS policies require `auth.uid() = user_id`; the library RPC is `SECURITY INVOKER`. Full-library saves are atomic but concurrent stale tabs can overwrite newer content.
+Saved addresses have owner/non-anonymous RLS. The library RPC is security invoker;
+invalid payloads and foreign-ID collisions roll back without losing existing records.
+Full-library saves are atomic, but concurrent stale tabs can overwrite newer content.
 
-Address input/results remain in memory until saved to the cloud or exported. There is no demo bypass or local library fallback. Theme preferences use the device key `wakapoint.theme.v1` and account metadata `wakapoint_theme`. Onboarding and tutorial metadata are allowlisted through `readPreferences`; user-editable metadata is never used for authorization. Async preference writes follow the SDK auth observer instead of assigning captured sessions. Test Vite servers use separate dependency caches to preserve the live preview.
+Notifications have account RLS and SELECT/UPDATE(read_at) browser grants only.
+Private trigger functions generate welcome/address-insert events with unique keys;
+content contains no addresses and repeated upserts do not duplicate notifications.
+The UI supports unread counts, paginated history, persistent read state, retry and links.
 
-The gateway verifies user tokens via Supabase Auth, validates postcode actions and origin, applies per-user/hashed-IP database rate counters, calls NIPOST with a server secret, allowlists output fields, and caches filtered valid lookups for one hour. Private cache/rate tables have no direct browser grants. Local tests exercise the handler with injected dependencies; hosted SQL and service behaviour need separate verification.
+Input/results stay in memory until save/export. Optional random-email/local-library
+previews exist only in unconfigured development. Production has no preview bypass
+or cloud-failure local fallback. Allowlisted role/city/tutorial/theme metadata never
+grants permissions. Account changes unmount private state and cancel pending updates.
 
-## Configuration and deployment
+## Integrations
 
-Client: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`. Server: Supabase-supplied URL/service-role values plus `NIPOST_API_KEY` and `WAKAPOINT_ALLOWED_ORIGINS`. Google client secrets and email delivery configuration are set in provider dashboards.
+wakapoint-gateway keeps platform JWT verification, checks users through Auth,
+validates origins/input, applies private rate counters and allowlists upstream fields.
+Modern secret keys use apikey; legacy service-role JWTs remain supported. Missing
+NIPOST activation is reported honestly.
 
-Build once with public values and serve `dist/` from a static host. Workspace routes use hash navigation. Configure exact root callback URLs in Supabase Auth, apply `supabase/sql/schema.sql`, and deploy `wakapoint-gateway` separately with JWT verification enabled. No hosted resource is provisioned by the frontend build.
+wakapoint-auth-email validates Standard Webhooks signatures/timestamps before Resend
+calls. Templates cover OTP/link emails, secure email changes and security notices.
+Redirects use explicit origins/paths; provider responses are redacted and Resend
+idempotency keys prevent duplicate delivery during retries. Payloads/keys are not logged.
+
+## Hosting and status
+
+Public build values: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
+Server secrets: RESEND_API_KEY, WAKAPOINT_EMAIL_FROM, SEND_EMAIL_HOOK_SECRET and
+NIPOST_API_KEY; optional origin/site settings are in supabase/.env.example.
+Google credentials and Auth hook/redirect configuration belong in Supabase settings.
+
+The database and both functions were deployed to twsgnqkxruoqkqwgzjal on
+22 November 2026. Remote ownership/rollback checks passed. Google is enabled;
+Resend/NIPOST activation and real-user verification remain pending. The Vercel connection
+does not expose WakaPoint; its owner must set the public production build variables.
+Serve dist with the included Vercel rewrites/headers. Details: ../supabase/README.md.

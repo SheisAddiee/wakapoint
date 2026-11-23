@@ -11,9 +11,11 @@ import { WorkspaceTutorial } from './components/WorkspaceTutorial';
 import { LandingPage } from './components/LandingPage';
 import { ThemeProvider, useTheme } from './components/ThemeToggle';
 import { readPreviewSession, signInPreview, signOutPreview, updatePreviewSession } from './lib/previewAccount';
+import { accountRoute, callbackFailed, cleanCallbackUrl, emailCallback } from './lib/auth';
 
 function AppContent() {
-  const [publicPage, setPublicPage] = useState(() => location.hash.slice(1));
+  const [incomingUrl] = useState(() => new URL(location.href));
+  const [publicPage, setPublicPage] = useState(() => accountRoute(new URL(location.href)));
   const { theme, setTheme } = useTheme();
   const themeAccount = useRef('');
   const syncingTheme = useRef(false);
@@ -21,7 +23,8 @@ function AppContent() {
   const activeAccount = useRef<string | null>(null);
   const [config] = useState(loadGateway);
   const [client] = useState(() => { try { return getSupabase(config); } catch { return null; } });
-  const previewAuth = !config.url && !config.publicKey && import.meta.env.VITE_ENABLE_PREVIEW_AUTH !== 'false';
+  const previewAuth = import.meta.env.DEV && !config.url && !config.publicKey && import.meta.env.VITE_ENABLE_PREVIEW_AUTH !== 'false';
+  const initialization = useRef<Promise<void> | null>(null);
   const [session, setSession] = useState<Pick<Session, 'user'> | null>(() => previewAuth ? readPreviewSession() : null), [initializing, setInitializing] = useState(!!client);
   const [tutorialDismissed, setTutorialDismissed] = useState(false), [tutorialRequested, setTutorialRequested] = useState(false);
   const [error, setError] = useState(''), [leaving, setLeaving] = useState(false);
@@ -44,14 +47,24 @@ function AppContent() {
       if (_event === 'SIGNED_OUT') toast.dismiss();
       acceptSession(next);
     });
-    client.auth.getSession().then(({ data, error: authError }) => {
+    if (!initialization.current) initialization.current = (async () => {
+      const callback = emailCallback(incomingUrl);
+      if (callback) { const { error: linkError } = await client.auth.verifyOtp(callback); if (linkError) throw linkError; }
+    })();
+    initialization.current.then(() => client.auth.getSession()).then(async ({ data, error: authError }) => {
       if (cancelled) return;
-      acceptSession(data.session);
-      const url = new URL(location.href);
-      if (authError || url.searchParams.has('error')) setError('Sign-in could not be completed. Please try email or Google again.');
-      ['code','error','error_code','error_description'].forEach(key => url.searchParams.delete(key));
-      history.replaceState(null, '', url.pathname + url.search + url.hash);
-    }).catch(() => { if (!cancelled) setError('Your session could not be restored. Please sign in again.'); }).finally(() => { if (!cancelled) setInitializing(false); });
+      if (authError) throw authError;
+      const epoch = accountEpoch.current;
+      if (data.session) {
+        const { data: verified, error: verificationError } = await client.auth.getUser();
+        if (cancelled || epoch !== accountEpoch.current) return;
+        if (verificationError || !verified.user || verified.user.is_anonymous) { acceptSession(null); throw verificationError || new Error('Account unavailable'); }
+        acceptSession({ ...data.session, user: verified.user });
+      } else acceptSession(null);
+      if (callbackFailed(incomingUrl)) setError('Sign-in could not be completed. Please try email or Google again.');
+    }).catch(() => { if (!cancelled) { acceptSession(null); setError('Your sign-in link or session could not be restored. Please sign in again.'); } }).finally(() => {
+      if (!cancelled) { history.replaceState(null, '', cleanCallbackUrl(new URL(location.href))); setPublicPage(accountRoute(new URL(location.href))); setInitializing(false); }
+    });
     return () => { cancelled = true; accountEpoch.current += 1; subscription.unsubscribe(); };
   }, [client]);
   useEffect(() => { const sync = () => setPublicPage(location.hash.slice(1)); window.addEventListener('hashchange', sync); return () => window.removeEventListener('hashchange', sync); }, []);

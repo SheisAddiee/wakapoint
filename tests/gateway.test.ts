@@ -4,14 +4,15 @@ import { canonicalPostcode, createGateway, filterLookup, filterSuggestions } fro
 
 const origin = 'https://wakapoint.example';
 const token = 'Bearer synthetic-test-token-123456789';
-function harness(options: { limited?:boolean; upstreamStatus?:number; cache?:unknown; missingKey?:boolean } = {}) {
+function harness(options: { limited?:boolean; upstreamStatus?:number; cache?:unknown; missingKey?:boolean; anonymous?:boolean; dummyKey?:boolean } = {}) {
   const calls: {url:string;body:unknown}[] = [];
   const env: Record<string,string> = { WAKAPOINT_ALLOWED_ORIGINS:origin,SUPABASE_URL:'https://project.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'synthetic-service-key',NIPOST_API_KEY:'nipost_test_synthetic-test-key' };
   if (options.missingKey) delete env.NIPOST_API_KEY;
+  if (options.dummyKey) env.NIPOST_API_KEY = 'nipost_test_REPLACE_ME';
   const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input), body = typeof init?.body === 'string' ? JSON.parse(init.body) : null;
     calls.push({url,body});
-    if (url.endsWith('/auth/v1/user')) return Response.json({id:'user-one'});
+    if (url.endsWith('/auth/v1/user')) return Response.json({id:'user-one',is_anonymous:!!options.anonymous});
     if (url.endsWith('wakapoint_consume_limit')) return Response.json(!options.limited);
     if (url.endsWith('wakapoint_cache_get')) return Response.json(options.cache ?? null);
     if (url.endsWith('wakapoint_cache_put')) return new Response(null,{status:204});
@@ -27,6 +28,18 @@ test('gateway refuses disallowed origins and unauthenticated requests before ups
   assert.equal((await handler(request({action:'lookup'},true,'https://attacker.example'))).status,403);
   assert.equal((await handler(request({action:'lookup'},false))).status,401);
   assert.equal(calls.length,0);
+});
+test('anonymous Supabase accounts cannot use the production gateway', async () => {
+  const {handler,calls} = harness({anonymous:true});
+  assert.equal((await handler(request({action:'health'}))).status,401);
+  assert.equal(calls.length,1);
+});
+test('setup placeholders never claim official postcode activation', async () => {
+  const { handler, calls } = harness({ dummyKey: true });
+  const health = await handler(request({ action: 'health' }));
+  assert.equal((await health.json()).data.configured, false);
+  assert.equal((await handler(request({ action: 'lookup', code: 'FC-01-A01-KP-27' }))).status, 503);
+  assert.ok(!calls.some(call => call.url.startsWith('https://api.postcode.gov.ng')));
 });
 test('preflight is allowed for configured origins without a token', async () => {
   const {handler,calls} = harness();

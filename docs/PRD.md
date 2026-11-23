@@ -21,7 +21,9 @@ The user requested a black-and-grey geospatial workspace for the NIPOST Hackatho
 - Saved records, exports and gateway responses exclude common contact patterns and upstream owner fields.
 - Changed address input blocks saving/export of stale results. Changed postcode input discards old in-flight responses.
 - Unknown/conflicting localities surface review guidance, and map outages prevent new street-map pin placement.
-- The workspace starts empty and has no sample loaders or demo bypass; RLS restricts saved records to their authenticated owner.
+- The production workspace starts empty and has no demo-auth bypass; owner RLS protects cloud records. Unconfigured development can use explicitly enabled local preview profiles.
+- Account notifications persist read status, enforce account ownership and prevent user-authored content. New saves and verified-account setup generate notifications without including addresses.
+- Auth emails support codes and cross-device links; Resend verifies signed requests, validates redirects and prevents duplicate delivery during retries.
 - Landing features, FAQs and role descriptions are functional; theme preferences persist across visits. Hero and navbar share the desktop wallpaper on tablets/larger devices and the mobile wallpaper on phones, with readable overlays in both themes.
 - Marketing entrances use opacity/transform, keyboard navigation is immediate, and reduced motion removes movement. Session loading reflects the actual auth request.
 - Relevant type, unit, build and browser checks pass, with hosted/physical-device limits reported separately.
@@ -30,4 +32,4 @@ The user requested a black-and-grey geospatial workspace for the NIPOST Hackatho
 
 The implementation does not claim trained NER, nationwide building-level geocoding, calculated routes, legally certified privacy compliance, or achieved benchmark targets from the concept note. Team roles/permissions, account deletion, payments, cross-tab conflict resolution and automated dispatch are outside the current scope.
 
-Live email, Google and NIPOST verification remain dependent on operator-supplied hosted configuration. No pitch deck/video or production deployment was requested in this continuation.
+The WakaPoint database and functions are deployed. Google is enabled in Supabase; real consent/callback verification remains pending. Live Resend and NIPOST require provider credentials and activation. Frontend production configuration must be set through the WakaPoint hosting account. Account deletion and cross-tab conflict handling remain open launch decisions.
