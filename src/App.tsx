@@ -92,6 +92,9 @@ function AppContent() {
 
   const preferences = useMemo(() => readPreferences(session?.user.user_metadata?.wakapoint), [session?.user.user_metadata?.wakapoint]);
   const openTutorial = useCallback(() => setTutorialRequested(true), []);
+  const openSignup = useCallback(() => { location.hash = 'signup'; }, []);
+  const openSignin = useCallback(() => { location.hash = 'signin'; }, []);
+  const openWorkspace = useCallback(() => { location.hash = 'resolve'; }, []);
   const leave = useCallback(async () => {
     if (leaving) return;
     setLeaving(true);
@@ -127,7 +130,7 @@ function AppContent() {
   };
 
   if (initializing) return <AuthFrame><div className="auth-loading" role="status"><div className="session-loader-mark" aria-hidden="true"><span/></div><span className="auth-eyebrow">WAKAPOINT</span><p>Opening your workspace…</p><div className="session-loader-lines" aria-hidden="true"><span/><span/><span/></div></div></AuthFrame>;
-  if (publicPage === 'home' || (!session && !publicPage && !error)) return <LandingPage signedIn={!!session} onStart={() => { location.hash = 'signup'; }} onSignIn={() => { location.hash = 'signin'; }} onWorkspace={() => { location.hash = 'resolve'; }}/>;
+  if (publicPage === 'home' || (!session && !publicPage && !error)) return <LandingPage signedIn={!!session} onStart={openSignup} onSignIn={openSignin} onWorkspace={openWorkspace}/>;
   if (!session) return <AuthScreen key={publicPage === 'signin' ? 'signin' : 'signup'} initialMode={publicPage === 'signin' ? 'signin' : 'signup'} client={client} initialError={error} onPreviewSignIn={previewAuth ? email => { const next = signInPreview(email); accountEpoch.current += 1; activeAccount.current = next.user.id; setSession(next); setTutorialDismissed(false); setTutorialRequested(false); setError(''); location.hash = 'resolve'; } : undefined}/>;
   if (!preferences) return <Onboarding onComplete={complete} onBack={() => { void leave(); }}/>;
   return <><WorkspaceApp key={session.user.id} gatewayConfig={config} preferences={preferences} previewAccountId={previewAuth ? session.user.id : undefined} accountLabel={session.user.email || 'WakaPoint account'} onSignOut={leave} signingOut={leaving} onTutorial={openTutorial}/><WorkspaceTutorial open={tutorialRequested || (!preferences.tutorial && !tutorialDismissed)} onFinish={finishTutorial}/>{error && <div className="account-error" role="alert">{error}<button className="auth-text-button" onClick={() => setError('')}>Dismiss</button></div>}</>;

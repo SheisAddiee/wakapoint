@@ -2,7 +2,7 @@
 // Only the one-time word reveal is used; see THIRD_PARTY_NOTICES.md.
 import { useEffect, useRef, useState } from 'react';
 
-export function BlurText({ text, className = '' }: { text: string; className?: string }) {
+export function BlurText({ text, className = '', delayOffset = 0 }: { text: string; className?: string; delayOffset?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   const words = text.split(' ');
@@ -20,7 +20,7 @@ export function BlurText({ text, className = '' }: { text: string; className?: s
     return () => { observer.disconnect(); reduced.removeEventListener('change', reveal); };
   }, []);
   return <span ref={ref} className={`rb-blur-text ${className}`} aria-label={text} data-revealed={visible}>
-    {words.map((word, index) => <span key={`${index}-${word}`} aria-hidden="true" style={{ transitionDelay: `${Math.min(index * 45, 220)}ms` }}>
+    {words.map((word, index) => <span key={`${index}-${word}`} aria-hidden="true" style={{ transitionDelay: `${delayOffset + Math.min(index * 45, 220)}ms` }}>
       {word}{index < words.length - 1 ? '\u00a0' : ''}
     </span>)}
   </span>;

@@ -17,9 +17,8 @@ invalid-payload/foreign-ID rollback, notification deduplication/read permissions
 anonymous rejection and private-RPC denial. No fixture accounts remain; no emails
 were sent. Local handler tests use synthetic credentials and mock providers.
 
-Google is enabled in the live project. Google rejected the configured client secret
-with invalid_client on 23 November; replace it with the matching Web client secret
-value before real consent/callback verification.
+Google is enabled in the live project, and the user updated its credentials in
+Auth > Google on 23 November. Fresh real consent/callback verification is pending.
 Resend and NIPOST still require activation below. The connected Vercel account does not expose
 the WakaPoint hosting project; its owner must set public build variables.
 
@@ -151,7 +150,7 @@ before launch. Local tests cannot establish live delivery or Google consent.
 The available Supabase MCP cannot set Auth configuration or Edge Function secrets.
 SQL cannot substitute for those settings. See the setup worksheet above.
 
-Google troubleshooting: the authorized redirect URI is correct. HTTP 401
-invalid_client with an invalid-secret description requires replacing the provider
-Client secret value, not its Secret ID, with the value from the same Google Web
-client as the saved client ID. A Vercel rebuild does not correct provider credentials.
+Google troubleshooting: Auth configuration APIs return hashes of secret values;
+do not send those hashes to Google as credentials. Use a fresh OAuth sign-in and
+Auth logs to diagnose actual failures. The authorized redirect URI is correct.
+The client ID and Client secret value must belong to the same Google Web client.

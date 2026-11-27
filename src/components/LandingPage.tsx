@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Accordion } from '@base-ui/react/accordion';
 import { ArrowDown, ArrowRight, ArrowUpRight, Bookmark, Braces, Check, ChevronDown, FileStack, Fingerprint, LockKeyhole, MapPin, Navigation2, ShieldCheck } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
@@ -7,6 +7,7 @@ import { SpotlightCard } from './reactbits/SpotlightCard';
 import { HeroOrbit } from './HeroOrbit';
 import { ProductPreview, LandingProductStory } from './LandingProductStory';
 import { SpecularButton } from './reactbits/SpecularButton';
+import { StateMapCycler } from './StateMapCycler';
 
 const features = [
   { icon: Fingerprint, title: 'Address intelligence', text: 'Landmarks, building details and delivery cues, clearly organised.', note: 'From a description to structured context' },
@@ -27,10 +28,11 @@ const faqs = [
   { question: 'How do I get started?', answer: 'Create an account with email or Google, choose your workspace role and home city, and start with an address. A skippable walkthrough explains the tools. You can reopen it from Help whenever you need it.' },
 ];
 
-export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { signedIn: boolean; onStart: () => void; onSignIn: () => void; onWorkspace: () => void }) {
+function LandingPageView({ signedIn, onStart, onSignIn, onWorkspace }: { signedIn: boolean; onStart: () => void; onSignIn: () => void; onWorkspace: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const [instantFaq, setInstantFaq] = useState(false);
   const [overHero, setOverHero] = useState(true);
+  const [mapsPaused, setMapsPaused] = useState(false);
   const start = signedIn ? onWorkspace : onStart;
   useEffect(() => {
     const elements = root.current?.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -71,10 +73,10 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
       <section className="landing-hero">
         <HeroOrbit paused={!overHero}/>
         <div className="landing-kicker"><span/>BUILT FOR THE NIGERIAN LAST MILE</div>
-        <h1 aria-label="Local directions. A clearer way forward.">Local directions.<br/><BlurText text="A clearer way forward."/></h1>
+        <h1 aria-label="Local directions. A clearer way forward."><span className="hero-headline-line">Local <StateMapCycler paused={mapsPaused}/> directions.</span><span className="hero-forward-line"><span className="hero-forward-start"><BlurText text="A clearer"/></span><StateMapCycler paused={mapsPaused} initialIndex={2} phaseDelay={600}/><span className="hero-forward-end"><BlurText text="way forward." delayOffset={90}/></span></span></h1>
         <p>Turn local directions into delivery details your team can use.</p>
         <div className="landing-hero-actions"><SpecularButton className="button primary" onClick={start}>{signedIn ? 'Open your workspace' : 'Get started with WakaPoint'}<ArrowRight size={17}/></SpecularButton><button className="landing-how-link" onClick={e => scrollTo('how-it-works', e.detail > 0)}>See how it works <ArrowDown size={15}/></button></div>
-        <div className="landing-account-note"><ShieldCheck size={13}/>Your account. Your address library. Your next delivery.</div>
+        <div className="landing-account-note"><ShieldCheck size={13}/><span>Your account. Your address library. Your next delivery.</span><button className="hero-map-toggle" onClick={() => setMapsPaused(value => !value)} aria-pressed={mapsPaused}>{mapsPaused ? 'Resume maps' : 'Pause maps'}</button></div>
         <div className="landing-flow" data-reveal aria-label="Describe a destination, extract context, review and hand off">
           <div><span className="flow-number">01</span><Navigation2 size={25} strokeWidth={1.2}/><strong>The local description</strong><small>A city, a landmark, a final detail.</small></div><ArrowRight className="flow-arrow" size={22}/>
           <div><span className="flow-number">02</span><Fingerprint size={25} strokeWidth={1.2}/><strong>Structured context</strong><small>Landmarks, units and delivery cues.</small></div><ArrowRight className="flow-arrow" size={22}/>
@@ -116,3 +118,5 @@ export function LandingPage({ signedIn, onStart, onSignIn, onWorkspace }: { sign
     <footer className="landing-footer"><a className="auth-brand" href="#home"><Navigation2 size={20} strokeWidth={1.5}/><span>WakaPoint<span>.</span></span></a><span>Designed for the way Nigeria gives directions.</span><a href="https://docs.postcode.gov.ng/" target="_blank" rel="noreferrer">NIPOST documentation <ArrowUpRight size={13}/></a></footer>
   </div>;
 }
+
+export const LandingPage = memo(LandingPageView);

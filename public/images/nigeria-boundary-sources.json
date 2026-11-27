@@ -1,0 +1,18 @@
+[
+  {
+    "level": "ADM0",
+    "source": "GRID3",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "download": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NGA/ADM0/geoBoundaries-NGA-ADM0_simplified.geojson",
+    "year": "2022",
+    "boundaryID": "NGA-ADM0-39225661"
+  },
+  {
+    "level": "ADM1",
+    "source": "GRID3",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "download": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/NGA/ADM1/geoBoundaries-NGA-ADM1_simplified.geojson",
+    "year": "2022",
+    "boundaryID": "NGA-ADM1-27671186"
+  }
+]

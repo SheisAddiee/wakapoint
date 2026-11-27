@@ -11,7 +11,7 @@ shared React Bits components, original animation timing and readable wavy theme 
 | Landing screenshots, NIPOST diagram, DM Sans/Newsreader | Committed previously | Local assets and font licenses |
 | Production Auth boundary | Implemented | Non-anonymous sessions, restored-user verification, safe callback cleanup |
 | Email OTP and cross-device token-hash links | Implemented / mock-browser verified | Real email delivery still requires provider activation |
-| Google OAuth | Enabled; invalid secret blocks sign-in | Google token endpoint returned HTTP 401 invalid_client; matching client secret must be replaced |
+| Google OAuth | Enabled; credentials updated by user | Provider configuration is set; fresh real sign-in verification remains pending |
 | Private address library and gateway storage | Deployed | Owner isolation, invalid/foreign-ID rollback and anonymous-denial SQL tests passed |
 | Notification inbox | Deployed / implemented | Welcome/save triggers, content grants, history/read state, retries and navigation |
 | NIPOST gateway | Deployed | JWT + Auth user checks, rate limits, output allowlist/cache; real key pending |
@@ -39,9 +39,8 @@ shared React Bits components, original animation timing and readable wavy theme 
 
 ## Remaining activation
 
-1. Replace the invalid Google client secret with the matching Web client secret value
-   in Supabase Auth > Google, then verify a fresh real sign-in. The local management
-   token is configured and remains excluded from Git/Vercel/runtime secrets.
+1. Verify a fresh real Google sign-in after the user updated Auth > Google. The local
+   management token is configured and remains excluded from Git/Vercel/runtime secrets.
 2. Replace Resend sender/key/hook placeholders in hosted Edge Function Secrets,
    verify the sending domain, enable the Auth hook and test real delivery.
 3. Set a real NIPOST key and verify permitted sandbox/live calls.
@@ -59,5 +58,12 @@ Do not automatically push. Earlier verified milestones: b86931d, 474577d, ef67dd
 
 Hosted follow-up on 23 November: Auth Site URL is https://wakapoint.vercel.app;
 production and localhost/127.0.0.1 roots/callbacks are allowed. Existing Google
-credentials were preserved. Google credential validation returned invalid_client
-with an invalid-client-secret message; no user authorization code was consumed.
+credentials were preserved. Correction: the Management API returns secret hashes;
+the earlier invalid_client probe used the hash and did not validate the stored
+credential. The user updated Google credentials; verify a real sign-in instead.
+
+Hero maps: two inline slots inspired by Mobbin, starting with Nigeria in the first
+slot, cycle through real GRID3/geoBoundaries state outlines. The slots update every
+2.4 seconds with a 600ms phase offset; map transitions use 400ms entry/280ms exit.
+Original text-reveal timings are retained. Pause/offscreen/visibility/reduced-motion
+handling and instant keyboard changes are implemented; final browser check follows.

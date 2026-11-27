@@ -53,3 +53,14 @@ the SIL Open Font License 1.1. Their copyright notices and full licenses are in
 The server-only Auth email function uses Standard Webhooks 1.0.0 to validate
 webhook signatures and timestamps. It is MIT licensed; see the package's
 [license](https://github.com/standard-webhooks/standard-webhooks/blob/main/libraries/javascript/LICENSE).
+
+## Nigeria and state outlines
+
+The hero's decorative SVG silhouettes are adapted and simplified from GRID3
+boundaries distributed through [geoBoundaries](https://www.geoboundaries.org/),
+under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Attribution: GRID3 / geoBoundaries, Nigeria ADM0 and ADM1. The source dataset includes
+36 states and the Federal Capital Territory. Projection, scale and simplification
+were changed for the inline illustration; these silhouettes are not used to resolve addresses.
+Exact source versions/downloads are recorded in
+[nigeria-boundary-sources.json](public/images/nigeria-boundary-sources.json).

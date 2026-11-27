@@ -1,0 +1,20 @@
+/* Reveal the new page snapshot while the previous themed content remains visible. */
+.theme-flight { position: fixed; left: 0; top: 42vh; width: 90px; height: 68px; pointer-events: none; view-transition-name: wakapoint-flight; color: #282824; }
+.theme-flight[data-destination="dark"] { color: #ecebe5; }
+.theme-flight > svg { transform: rotate(45deg); }
+.theme-flight > span { position: absolute; right: 63px; top: 29px; width: 100px; height: 1px; background: linear-gradient(90deg,transparent,currentColor); }
+html[data-theme-flight] { --theme-flight-duration: 550ms; }
+html[data-theme-flight]::view-transition { pointer-events: none; }
+html[data-theme-flight]::view-transition-group(root),html[data-theme-flight]::view-transition-group(wakapoint-flight) { animation-duration: 0s; }
+html[data-theme-flight]::view-transition-old(root) { animation: none; mix-blend-mode: normal; }
+html[data-theme-flight]::view-transition-new(root) { animation: theme-wave-reveal var(--theme-flight-duration) var(--ease-out) both; mix-blend-mode: normal; }
+html[data-theme-flight]::view-transition-old(wakapoint-flight) { display: none; }
+html[data-theme-flight]::view-transition-new(wakapoint-flight) { animation: theme-plane-cross var(--theme-flight-duration) var(--ease-out) both; }
+html[data-theme-flight] .hero-orbit * { animation-play-state: paused; }
+@keyframes theme-plane-cross { from { transform: translateX(-90px); } to { transform: translateX(calc(100vw + 90px)); } }
+/* A fixed 17-point wave translates between two keyframes, without phase deformation. */
+@keyframes theme-wave-reveal {
+  from { clip-path: polygon(0% 0%,-8% 0%,-5.17% 6.25%,-4% 12.5%,-5.17% 18.75%,-8% 25%,-10.83% 31.25%,-12% 37.5%,-10.83% 43.75%,-8% 50%,-5.17% 56.25%,-4% 62.5%,-5.17% 68.75%,-8% 75%,-10.83% 81.25%,-12% 87.5%,-10.83% 93.75%,-8% 100%,0% 100%); }
+  to { clip-path: polygon(0% 0%,108% 0%,110.83% 6.25%,112% 12.5%,110.83% 18.75%,108% 25%,105.17% 31.25%,104% 37.5%,105.17% 43.75%,108% 50%,110.83% 56.25%,112% 62.5%,110.83% 68.75%,108% 75%,105.17% 81.25%,104% 87.5%,105.17% 93.75%,108% 100%,0% 100%); }
+}
+@media(prefers-reduced-motion:reduce) { .theme-flight { display: none; } html[data-theme-flight]::view-transition-new(root) { animation: none; } }
